@@ -1,23 +1,19 @@
 ﻿using System.Security.Claims;
+using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.DTOs;
+using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using HealthCareAB_v1.Constants;
-using HealthCareAB_v1.Services.Interfaces;
 
 namespace HealthCareAB_v1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
-        {
-            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        }
+        private readonly IAuthService _authService =
+            authService ?? throw new ArgumentNullException(nameof(authService));
 
         /// <summary>
         /// Registers a new user with default User role.
@@ -36,7 +32,13 @@ namespace HealthCareAB_v1.Controllers
 
             return CreatedAtAction(
                 nameof(CheckAuthentication),
-                new { message = result.Message, username = result.Username, roles = result.Roles });
+                new
+                {
+                    message = result.Message,
+                    username = result.Username,
+                    roles = result.Roles,
+                }
+            );
         }
 
         /// <summary>
@@ -57,7 +59,14 @@ namespace HealthCareAB_v1.Controllers
             var cookieOptions = _authService.GetJwtCookieOptions();
             HttpContext.Response.Cookies.Append(CookieNames.Jwt, token, cookieOptions);
 
-            return Ok(new { message = result.Message, username = result.Username, roles = result.Roles });
+            return Ok(
+                new
+                {
+                    message = result.Message,
+                    username = result.Username,
+                    roles = result.Roles,
+                }
+            );
         }
 
         /// <summary>
@@ -88,12 +97,19 @@ namespace HealthCareAB_v1.Controllers
             }
 
             var username = User.Identity.Name ?? "Unknown";
-            var roles = User.Claims
-                .Where(c => c.Type == ClaimTypes.Role)
+            var roles = User
+                .Claims.Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value)
                 .ToList();
 
-            return Ok(new { message = "Authenticated", username, roles });
+            return Ok(
+                new
+                {
+                    message = "Authenticated",
+                    username,
+                    roles,
+                }
+            );
         }
     }
 }

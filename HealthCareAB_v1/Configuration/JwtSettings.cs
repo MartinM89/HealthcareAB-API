@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HealthCareAB_v1.Configuration
 {
@@ -25,4 +24,3 @@ namespace HealthCareAB_v1.Configuration
         public int ExpiryInMinutes { get; set; } = 60;
     }
 }
-

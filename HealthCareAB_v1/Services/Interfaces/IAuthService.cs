@@ -1,5 +1,4 @@
-﻿using System;
-using HealthCareAB_v1.DTOs;
+﻿using HealthCareAB_v1.DTOs;
 
 namespace HealthCareAB_v1.Services.Interfaces
 {
@@ -11,4 +10,3 @@ namespace HealthCareAB_v1.Services.Interfaces
         CookieOptions GetClearCookieOptions();
     }
 }
-
