@@ -1,5 +1,4 @@
-﻿using System;
-using HealthCareAB_v1.Models;
+﻿using HealthCareAB_v1.Models;
 
 namespace HealthCareAB_v1.Services.Interfaces
 {
@@ -12,4 +11,3 @@ namespace HealthCareAB_v1.Services.Interfaces
         bool VerifyPassword(string enteredPassword, string storedHash);
     }
 }
-

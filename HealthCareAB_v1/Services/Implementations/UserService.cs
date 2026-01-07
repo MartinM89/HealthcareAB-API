@@ -1,5 +1,4 @@
-﻿using System;
-using HealthCareAB_v1.Models;
+﻿using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -9,14 +8,10 @@ namespace HealthCareAB_v1.Services
     /// <summary>
     /// Service for user-related operations including CRUD and password management.
     /// </summary>
-    public class UserService : IUserService
+    public class UserService(IAppDbContext context) : IUserService
     {
-        private readonly IAppDbContext _context;
-
-        public UserService(IAppDbContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
+        private readonly IAppDbContext _context =
+            context ?? throw new ArgumentNullException(nameof(context));
 
         /// <inheritdoc />
         public async Task<bool> ExistsByUsernameAsync(string username)
@@ -57,6 +52,4 @@ namespace HealthCareAB_v1.Services
             return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
         }
     }
-
 }
-
