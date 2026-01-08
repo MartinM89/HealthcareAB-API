@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace HealthCareAB_v1.Models;
 
 public class Booking
@@ -8,7 +10,10 @@ public class Booking
     public DateOnly Date { get; set; }
     public string UserId { get; set; } = string.Empty;
 
+    [JsonIgnore]
     public TimeSlot TimeSlot { get; set; } = null!;
+
+    [JsonIgnore]
     public Patient Patient { get; set; } = null!;
-    public CaregiverDailySchedule DailySchedule { get; set; } = null!;
+    // public CaregiverDailySchedule DailySchedule { get; set; } = null!;
 }
