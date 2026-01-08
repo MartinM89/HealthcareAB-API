@@ -71,7 +71,7 @@ namespace HealthCareAB_v1.Services
             // If no roles requested, default to User
             if (requestedRoles == null || !requestedRoles.Any())
             {
-                return [Roles.User];
+                return [Roles.Patient];
             }
 
             // Return requested roles (original behavior)
