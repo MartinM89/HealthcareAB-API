@@ -2,16 +2,15 @@
 {
     public static class Roles
     {
-        public const string Admin = "Admin";
-        public const string User = "User";
+        public const string Caregiver = "CAREGIVER";
+        public const string Patient = "PATIENT";
 
         // Helper method to validate roles
         public static bool IsValidRole(string role)
         {
-            return role == Admin || role == User;
+            return role == Caregiver || role == Patient;
         }
 
-        public static IReadOnlyList<string> AllRoles => new[] { Admin, User };
+        public static IReadOnlyList<string> AllRoles => [Caregiver, Patient];
     }
 }
-
