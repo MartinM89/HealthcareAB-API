@@ -76,8 +76,3 @@ public class BookingController : ControllerBase
         return Guid.TryParse(id, out userId);
     }
 }
-
-    
-
-    
-
