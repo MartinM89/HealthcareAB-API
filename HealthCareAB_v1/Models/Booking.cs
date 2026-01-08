@@ -3,9 +3,10 @@ namespace HealthCareAB_v1.Models;
 public class Booking
 {
     public Guid Id { get; set; }
-    public string? Comment { get; set; }
+    public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateOnly Date { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
     public TimeSlot TimeSlot { get; set; } = null!;
     public Patient Patient { get; set; } = null!;
