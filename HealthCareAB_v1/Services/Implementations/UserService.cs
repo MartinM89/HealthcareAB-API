@@ -17,21 +17,21 @@ namespace HealthCareAB_v1.Services
         public async Task<bool> ExistsByUsernameAsync(string username)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(username);
-            return await _context.Users.AnyAsync(u => u.Username == username);
+            return await _context.Patients.AnyAsync(u => u.Username == username);
         }
 
         /// <inheritdoc />
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<Patient?> GetUserByUsernameAsync(string username)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(username);
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Patients.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         /// <inheritdoc />
-        public async Task CreateUserAsync(User user)
+        public async Task CreateUserAsync(Patient patient)
         {
-            ArgumentNullException.ThrowIfNull(user);
-            await _context.Users.AddAsync(user);
+            ArgumentNullException.ThrowIfNull(patient);
+            await _context.Patients.AddAsync(patient);
             await _context.SaveChangesAsync();
         }
 

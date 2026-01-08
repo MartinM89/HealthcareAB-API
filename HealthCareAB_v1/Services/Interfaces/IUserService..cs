@@ -5,8 +5,8 @@ namespace HealthCareAB_v1.Services.Interfaces
     public interface IUserService
     {
         Task<bool> ExistsByUsernameAsync(string username);
-        Task<User?> GetUserByUsernameAsync(string username);
-        Task CreateUserAsync(User user);
+        Task<Patient?> GetUserByUsernameAsync(string username);
+        Task CreateUserAsync(Patient patient);
         string HashPassword(string password);
         bool VerifyPassword(string enteredPassword, string storedHash);
     }
