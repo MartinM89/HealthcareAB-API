@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthCareAB_v1.Models;
 
-public class User
+public abstract class User
 {
     public Guid Id { get; set; }
 

@@ -44,21 +44,21 @@ namespace HealthCareAB_v1.Services
             // Determine roles with security check
             var roles = DetermineUserRoles(registerDto.Roles);
 
-            var user = new User
+            var patient = new Patient
             {
                 Username = registerDto.Username,
                 PasswordHash = _userService.HashPassword(registerDto.Password),
                 Roles = roles,
             };
 
-            await _userService.CreateUserAsync(user);
+            await _userService.CreateUserAsync(patient);
 
             return new AuthResponseDto
             {
                 Success = true,
                 Message = "User registered successfully",
-                Username = user.Username,
-                Roles = user.Roles,
+                Username = patient.Username,
+                Roles = patient.Roles,
             };
         }
 
