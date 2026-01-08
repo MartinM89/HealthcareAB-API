@@ -9,6 +9,6 @@ namespace HealthCareAB_v1.Services.Interfaces
         /// </summary>
         /// <param name="user">The user to generate a token for</param>
         /// <returns>The generated JWT token string</returns>
-        string GenerateToken(User user);
+        string GenerateToken(Patient user);
     }
 }

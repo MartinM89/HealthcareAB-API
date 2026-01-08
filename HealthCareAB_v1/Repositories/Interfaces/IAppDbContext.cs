@@ -5,7 +5,12 @@ namespace HealthCareAB_v1.Repositories.Interfaces
 {
     public interface IAppDbContext
     {
-        DbSet<User> Users { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<TimeSlot> TimeSlots { get; set; }
+        public DbSet<Caregiver> Caregivers { get; set; }
+        public DbSet<CaregiverDailySchedule> GetCaregiverDailySchedules { get; set; }
+        public DbSet<CaregiverStatus> GetCaregiverStatuses { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
