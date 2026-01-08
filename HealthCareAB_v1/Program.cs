@@ -1,8 +1,10 @@
 ﻿using HealthCareAB_v1.Extensions;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // === ALLT DETTA MÅSTE VARA FÖRE builder.Build() ===
+builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -25,14 +27,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 // Removed to work in dev with React Vite on http...
