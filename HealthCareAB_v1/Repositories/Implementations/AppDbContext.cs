@@ -45,8 +45,8 @@ namespace HealthCareAB_v1.Repositories.Implementations
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
         public DbSet<Caregiver> Caregivers { get; set; }
-        public DbSet<CaregiverDailySchedule> GetCaregiverDailySchedules { get; set; }
-        public DbSet<CaregiverStatus> GetCaregiverStatuses { get; set; }
+        public DbSet<CaregiverDailySchedule> CaregiverDailySchedules { get; set; }
+        public DbSet<CaregiverStatus> CaregiverStatuses { get; set; }
 
         // public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         // {
