@@ -1,4 +1,5 @@
 using HealthCareAB_v1.DTOs.Booking;
+using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
@@ -17,7 +18,7 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
     {
         var patient =
             await _appDbContext.Patients.FirstOrDefaultAsync(p => p.Id == Guid.Parse(userId))
-            ?? throw new Exception("Patient not found");
+            ?? throw new NotFoundException("Patient not found");
 
         var booking = new Booking
         {
