@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using HealthCareAB_v1.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HealthCareAB_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108132043_RemovedDailScheduleRelationFromBooking")]
+    partial class RemovedDailScheduleRelationFromBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,11 +227,11 @@ namespace HealthCareAB_v1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<TimeOnly>("End")
-                        .HasColumnType("time without time zone");
-
                     b.Property<TimeOnly>("Start")
                         .HasColumnType("time without time zone");
+
+                    b.Property<double>("TimeLength")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 

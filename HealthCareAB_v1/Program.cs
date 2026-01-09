@@ -1,4 +1,8 @@
 ﻿using HealthCareAB_v1.Extensions;
+using HealthCareAB_v1.Repositories.Implementations;
+using HealthCareAB_v1.Repositories.Interfaces;
+using HealthCareAB_v1.Services.Implementations;
+using HealthCareAB_v1.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +30,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 var app = builder.Build();
 
