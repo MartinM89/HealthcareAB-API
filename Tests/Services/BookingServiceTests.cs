@@ -64,6 +64,7 @@ public class BookingServiceTests
         Assert.Equal(dto.Date, result.Date);
         Assert.Equal(userId, result.UserId);
         Assert.Equal(dto.Start, result.TimeSlot.Start);
+        Assert.Equal(dto.Start.AddMinutes(30), result.TimeSlot.End);
         Assert.NotNull(result.Patient);
 
         _bookingRepositoryMock.Verify(
