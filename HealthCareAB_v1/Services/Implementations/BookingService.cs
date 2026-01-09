@@ -13,6 +13,7 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 {
     private readonly AppDbContext _appDbContext = appDbContext;
     private readonly IBookingRepository _bookingRepository = bookingRepository;
+    private const double durationInMinutes = 30;
 
     public async Task<Booking> CreateAsync(string userId, CreateBookingDto dto)
     {
@@ -27,10 +28,20 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
             UserId = userId,
-            TimeSlot = new TimeSlot { Start = dto.Start },
+            TimeSlot = new TimeSlot
+            {
+                Start = dto.Start,
+                End = SetEnd(dto.Start, durationInMinutes),
+            },
             Patient = patient,
         };
 
         return await _bookingRepository.CreateAsync(booking);
+    }
+
+    private static TimeOnly SetEnd(TimeOnly start, double timeLength)
+    {
+        var finalTime = timeLength;
+        return start.AddMinutes(finalTime);
     }
 }
