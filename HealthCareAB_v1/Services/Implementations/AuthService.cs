@@ -1,140 +1,151 @@
 ﻿using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.DTOs;
+using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace HealthCareAB_v1.Services
+namespace HealthCareAB_v1.Services.Implementations;
+
+/// <summary>
+/// Service handling authentication operations including registration and login.
+/// </summary>
+public class AuthService(
+    IUserService userService,
+    IJwtTokenService jwtTokenService,
+    IOptions<JwtSettings> jwtSettings,
+    IWebHostEnvironment environment,
+    IHttpContextAccessor httpContextAccessor
+) : IAuthService
 {
-    /// <summary>
-    /// Service handling authentication operations including registration and login.
-    /// </summary>
-    public class AuthService(
-        IUserService userService,
-        IJwtTokenService jwtTokenService,
-        IOptions<JwtSettings> jwtSettings,
-        IWebHostEnvironment environment,
-        IHttpContextAccessor httpContextAccessor
-    ) : IAuthService
+    private readonly IUserService _userService =
+        userService ?? throw new ArgumentNullException(nameof(userService));
+    private readonly IJwtTokenService _jwtTokenService =
+        jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
+    private readonly JwtSettings _jwtSettings =
+        jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
+    private readonly bool _isDevelopment = environment?.IsDevelopment() ?? false;
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+
+    /// <inheritdoc />
+    public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
     {
-        private readonly IUserService _userService =
-            userService ?? throw new ArgumentNullException(nameof(userService));
-        private readonly IJwtTokenService _jwtTokenService =
-            jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
-        private readonly JwtSettings _jwtSettings =
-            jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
-        private readonly bool _isDevelopment = environment?.IsDevelopment() ?? false;
-        private readonly IHttpContextAccessor _httpContextAccessor =
-            httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        ArgumentNullException.ThrowIfNull(registerDto);
 
-        /// <inheritdoc />
-        public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
+        if (await _userService.ExistsByUsernameAsync(registerDto.Username))
         {
-            ArgumentNullException.ThrowIfNull(registerDto);
-
-            if (await _userService.ExistsByUsernameAsync(registerDto.Username))
-            {
-                return new AuthResponseDto
-                {
-                    Success = false,
-                    Message = "Username is already taken",
-                };
-            }
-
-            // Determine roles with security check
-            var roles = DetermineUserRoles(registerDto.Roles);
-
-            var patient = new Patient
-            {
-                Username = registerDto.Username,
-                PasswordHash = _userService.HashPassword(registerDto.Password),
-                Roles = roles,
-            };
-
-            await _userService.CreateUserAsync(patient);
-
-            return new AuthResponseDto
-            {
-                Success = true,
-                Message = "User registered successfully",
-                Username = patient.Username,
-                Roles = patient.Roles,
-            };
+            return new AuthResponseDto { Success = false, Message = "Username is already taken" };
         }
 
-        /// <summary>
-        /// Determines the roles for a new user.
-        /// Default role is set to user.
-        /// </summary>
-        private List<string> DetermineUserRoles(List<string>? requestedRoles)
-        {
-            // If no roles requested, default to User
-            if (requestedRoles == null || !requestedRoles.Any())
-            {
-                return [Roles.Patient];
-            }
+        // Throws an ValidationException if a role that doesn't exist is sent with the dto
+        DetermineValidRoles(registerDto.Roles);
 
-            // Return requested roles (original behavior)
-            return requestedRoles;
+        // Determine roles with security check
+        var roles = DetermineUserRoles(registerDto.Roles);
+
+        var patient = new Patient
+        {
+            Username = registerDto.Username,
+            PasswordHash = _userService.HashPassword(registerDto.Password),
+            Roles = roles,
+        };
+
+        await _userService.CreateUserAsync(patient);
+
+        return new AuthResponseDto
+        {
+            Success = true,
+            Message = "User registered successfully",
+            Username = patient.Username,
+            Roles = patient.Roles,
+        };
+    }
+
+    /// <summary>
+    /// Detemines if the roles for a new user are valid.
+    /// </summary>
+    private static void DetermineValidRoles(List<string> roles)
+    {
+        var rolesToCheck = roles.Select(Roles.IsValidRole);
+
+        foreach (var isValidRole in rolesToCheck)
+        {
+            if (!isValidRole)
+            {
+                throw new ValidationException("User cannot have that role.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines the roles for a new user.
+    /// Default role is set to PATIENT.
+    /// </summary>
+    private static List<string> DetermineUserRoles(List<string> requestedRoles)
+    {
+        // If no roles requested, default to User
+        if (requestedRoles == null || requestedRoles.Count == 0)
+        {
+            return [Roles.Patient];
         }
 
-        /// <inheritdoc />
-        public async Task<(AuthResponseDto response, string? token)> LoginAsync(LoginDto loginDto)
+        // Return requested roles (original behavior)
+        return requestedRoles;
+    }
+
+    /// <inheritdoc />
+    public async Task<(AuthResponseDto response, string? token)> LoginAsync(LoginDto loginDto)
+    {
+        ArgumentNullException.ThrowIfNull(loginDto);
+
+        var user = await _userService.GetUserByUsernameAsync(loginDto.Username);
+
+        if (user == null || !_userService.VerifyPassword(loginDto.Password, user.PasswordHash))
         {
-            ArgumentNullException.ThrowIfNull(loginDto);
-
-            var user = await _userService.GetUserByUsernameAsync(loginDto.Username);
-
-            if (user == null || !_userService.VerifyPassword(loginDto.Password, user.PasswordHash))
-            {
-                return (
-                    new AuthResponseDto
-                    {
-                        Success = false,
-                        Message = "Invalid username or password",
-                    },
-                    null
-                );
-            }
-
-            var token = _jwtTokenService.GenerateToken(user);
-
             return (
-                new AuthResponseDto
-                {
-                    Success = true,
-                    Message = "Login successful",
-                    Username = user.Username,
-                    Roles = user.Roles,
-                },
-                token
+                new AuthResponseDto { Success = false, Message = "Invalid username or password" },
+                null
             );
         }
 
-        /// <inheritdoc />
-        public CookieOptions GetJwtCookieOptions()
-        {
-            return new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = !_isDevelopment,
-                Path = "/",
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
-            };
-        }
+        var token = _jwtTokenService.GenerateToken(user);
 
-        /// <inheritdoc />
-        public CookieOptions GetClearCookieOptions()
-        {
-            return new CookieOptions
+        return (
+            new AuthResponseDto
             {
-                HttpOnly = true,
-                Secure = !_isDevelopment,
-                SameSite = SameSiteMode.Strict,
-                Path = "/",
-                Expires = DateTimeOffset.UtcNow.AddDays(-1),
-            };
-        }
+                Success = true,
+                Message = "Login successful",
+                Username = user.Username,
+                Roles = user.Roles,
+            },
+            token
+        );
+    }
+
+    /// <inheritdoc />
+    public CookieOptions GetJwtCookieOptions()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_isDevelopment,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+        };
+    }
+
+    /// <inheritdoc />
+    public CookieOptions GetClearCookieOptions()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_isDevelopment,
+            SameSite = SameSiteMode.Strict,
+            Path = "/",
+            Expires = DateTimeOffset.UtcNow.AddDays(-1),
+        };
     }
 }
