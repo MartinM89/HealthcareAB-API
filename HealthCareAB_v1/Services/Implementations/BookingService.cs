@@ -25,7 +25,7 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
         if (user.Patient is null)
         {
-            throw new NotFoundException("Patient not found11");
+            throw new NotFoundException("Patient not found");
         }
 
         var booking = new Booking
