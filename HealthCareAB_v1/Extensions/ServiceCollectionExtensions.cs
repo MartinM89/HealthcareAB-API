@@ -30,8 +30,16 @@ namespace HealthCareAB_v1.Extensions
             IConfiguration configuration
         )
         {
+            var dbSettings =
+                configuration.GetSection(DbSettings.SectionName).Get<DbSettings>()
+                ?? throw new InvalidOperationException(
+                    "DbConnectionStrings configuration section is missing"
+                );
+
+            services.Configure<DbSettings>(configuration.GetSection(DbSettings.SectionName));
+
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+                options.UseNpgsql(dbSettings.ConnectionString)
             );
 
             services.AddScoped<IAppDbContext>(provider =>

@@ -26,6 +26,6 @@ namespace HealthCareAB_v1.DTOs
         /// be changed to a more solid sulotion. For now you can leave it as it is if you want.
         /// Non-admin requests with Admin role will be ignored (defaults to User).
         /// </summary>
-        public List<string>? Roles { get; set; }
+        public List<string> Roles { get; set; } = [];
     }
 }
