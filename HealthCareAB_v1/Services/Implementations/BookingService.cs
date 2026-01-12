@@ -32,4 +32,18 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
         return await _bookingRepository.CreateAsync(booking);
     }
+
+    public async Task<CancelBookingResult> CancelAsync(Guid bookingId, Guid patentId, CancellationToken ct)
+    {
+        var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
+
+        if(booking == null)
+            return CancelBookingResult.NotFound;
+
+        if(booking.Patient == null || booking.Patient.Id != patentId)
+            return CancelBookingResult.Forbidden;
+
+        await _bookingRepository.DeleteAsync(booking, ct);
+        return CancelBookingResult.Success;
+    }
 }

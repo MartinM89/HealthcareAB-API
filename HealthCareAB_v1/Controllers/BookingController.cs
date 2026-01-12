@@ -54,20 +54,15 @@ public class BookingController : ControllerBase
         if(!TryGetUserId(out var patientId))
             return Unauthorized();
 
-        var booking = await _db.Bookings
-            .Include(b => b.Patient)
-            .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
+        var result = await _bookingService.CancelAsync(bookingId, patientId, ct);
 
-        if(booking == null)
-            return NotFound();
-        
-        if(booking.Patient == null || booking.Patient.Id != patientId)
-            return Forbid();
-
-        _db.Bookings.Remove(booking);
-        await _db.SaveChangesAsync(ct);
-
-        return NoContent();
+        return result switch
+        {
+            CancelBookingResult.Success => NoContent(),
+            CancelBookingResult.NotFound => NotFound(),
+            CancelBookingResult.Forbidden => Forbid(),
+            _ => Unauthorized()
+        };
     }
 
     private bool TryGetUserId(out Guid userId)

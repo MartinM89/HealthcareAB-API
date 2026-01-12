@@ -1,14 +1,13 @@
-using System.Data.Common;
-using System.Reflection;
 using System.Security.Claims;
 using HealthCareAB_v1.Controllers;
 using HealthCareAB_v1.Models;
+using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Services.Interfaces;
+using HealthCareAB_v1.Services.Implementations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 public class BookingControllerCancelBookingTests
@@ -24,22 +23,23 @@ public class BookingControllerCancelBookingTests
 
     private static BookingController CreateController(AppDbContext db, Guid? userId = null)
     {
-        var bookingServiceMock = new Mock<IBookingService>();
+        IBookingRepository bookingRepository = new BookingRepository(db);
+        IBookingService bookingService = new BookingService(bookingRepository, db);
 
-        var controller = new BookingController(db, bookingServiceMock.Object);
+        var controller = new BookingController(db, bookingService);
 
         var httpContext = new DefaultHttpContext();
 
-        if(userId != null)
+        if (userId != null)
         {
-            var claims = new []
+            var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.Value.ToString()),
                 new Claim(ClaimTypes.Role, Roles.Patient),
             };
 
             httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
-        } 
+        }
 
         controller.ControllerContext = new ControllerContext
         {
@@ -83,9 +83,7 @@ public class BookingControllerCancelBookingTests
         var result = await controller.CancelBooking(bookingId, CancellationToken.None);
 
         Assert.IsType<NoContentResult>(result);
-
-        var exists = await db.Bookings.AnyAsync(b => b.Id == bookingId);
-        Assert.False(exists);
+        Assert.False(await db.Bookings.AnyAsync(b => b.Id == bookingId));
     }
 
     [Fact]
@@ -123,9 +121,7 @@ public class BookingControllerCancelBookingTests
         var result = await controller.CancelBooking(bookingId, CancellationToken.None);
 
         Assert.IsType<ForbidResult>(result);
-
-        var exists = await db.Bookings.AnyAsync(b => b.Id == bookingId);
-        Assert.True(exists);
+        Assert.True(await db.Bookings.AnyAsync(b => b.Id == bookingId));
     }
 
     [Fact]

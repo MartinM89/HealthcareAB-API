@@ -5,4 +5,7 @@ namespace HealthCareAB_v1.Repositories.Interfaces;
 public interface IBookingRepository
 {
     Task<Booking> CreateAsync(Booking booking);
+    Task<Booking?> GetByIdWithPatientAsync(Guid bookingId, CancellationToken ct);
+    Task DeleteAsync(Booking booking, CancellationToken ct);
+
 }
