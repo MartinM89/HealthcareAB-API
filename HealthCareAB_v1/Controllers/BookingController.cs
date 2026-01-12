@@ -1,12 +1,10 @@
 using System.Security.Claims;
+using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
+using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HealthCareAB_v1.DTOs.Booking;
-using HealthCareAB_v1.Services.Interfaces;
-
 
 namespace HealthCareAB_v1.Controllers;
 
@@ -51,7 +49,7 @@ public class BookingController : ControllerBase
     [HttpDelete("{bookingId:guid}")]
     public async Task<IActionResult> CancelBooking(Guid bookingId, CancellationToken ct)
     {
-        if(!TryGetUserId(out var patientId))
+        if (!TryGetUserId(out var patientId))
             return Unauthorized();
 
         var result = await _bookingService.CancelAsync(bookingId, patientId, ct);
@@ -61,7 +59,7 @@ public class BookingController : ControllerBase
             CancelBookingResult.Success => NoContent(),
             CancelBookingResult.NotFound => NotFound(),
             CancelBookingResult.Forbidden => Forbid(),
-            _ => Unauthorized()
+            _ => Unauthorized(),
         };
     }
 

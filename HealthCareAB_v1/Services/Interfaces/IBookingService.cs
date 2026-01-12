@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
 

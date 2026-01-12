@@ -1,14 +1,13 @@
 using System.Security.Claims;
 using HealthCareAB_v1.Controllers;
 using HealthCareAB_v1.Models;
-using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Repositories.Implementations;
-using HealthCareAB_v1.Services.Interfaces;
+using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Implementations;
+using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 public class BookingControllerCancelBookingTests
 {
@@ -17,7 +16,7 @@ public class BookingControllerCancelBookingTests
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        
+
         return new AppDbContext(options);
     }
 
@@ -41,10 +40,7 @@ public class BookingControllerCancelBookingTests
             httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
         }
 
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = httpContext
-        };
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         return controller;
     }
@@ -71,7 +67,7 @@ public class BookingControllerCancelBookingTests
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
             UserId = patientId.ToString(),
             Patient = patient,
-            TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) }
+            TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) },
         };
 
         db.Patients.Add(patient);
@@ -109,7 +105,7 @@ public class BookingControllerCancelBookingTests
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
             UserId = ownerId.ToString(),
             Patient = owner,
-            TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) }
+            TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) },
         };
 
         db.Patients.Add(owner);
