@@ -18,19 +18,19 @@ namespace HealthCareAB_v1.Services
             jwtSettings.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
 
         /// <inheritdoc />
-        public string GenerateToken(Patient patient)
+        public string GenerateToken(User user)
         {
-            ArgumentNullException.ThrowIfNull(patient);
+            ArgumentNullException.ThrowIfNull(user);
 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, patient.Id.ToString()),
-                new(ClaimTypes.Name, patient.Username),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.Username),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
             // Add role claims for authorization
-            claims.AddRange(patient.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
