@@ -73,4 +73,19 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         var finalTime = timeLength;
         return start.AddMinutes(finalTime);
     }
+
+    public async Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct)
+    {
+        var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
+
+        return [.. bookings.Select(b => new BookingResponseDto
+        {
+            Id = b.Id,
+            Comment = b.Comment,
+            CreatedAt = b.CreatedAt,
+            Date = b.Date,
+            Start = b.TimeSlot.Start,
+            End = b.TimeSlot.End,
+        })];
+    }
 }

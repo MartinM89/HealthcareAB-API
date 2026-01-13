@@ -8,7 +8,7 @@ public static class Roles
     // Helper method to validate roles
     public static bool IsValidRole(string role)
     {
-        return role == Caregiver || role == Patient;
+        return role is Caregiver or Patient;
     }
 
     public static IReadOnlyList<string> AllRoles => [Caregiver, Patient];
