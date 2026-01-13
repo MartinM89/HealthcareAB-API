@@ -75,11 +75,6 @@ public class TimeSlotServiceTests
         // Arrange
         var timeSlotId = Guid.Empty;
 
-        // Act
-        _timeSlotRepositoryMock
-            .Setup(r => r.GetByIdAsync(timeSlotId))
-            .ReturnsAsync((TimeSlot?)null);
-
         // Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(
             () => _timeSlotService.GetByIdAsync(timeSlotId)
