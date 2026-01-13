@@ -32,13 +32,14 @@ public class BookingServiceTests
     {
         // Arrange (use shared fixtures)
         var patientId = Guid.NewGuid();
-        var patient = new Patient
+        var user = new User
         {
             Id = patientId,
             Username = "test",
             PasswordHash = "h",
+            Patient = new Patient { },
         };
-        _context.Patients.Add(patient);
+        _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
         _bookingRepositoryMock
@@ -62,7 +63,6 @@ public class BookingServiceTests
         Assert.Equal(dto.Comment, result.Comment);
         Assert.InRange(result.CreatedAt, before.AddSeconds(-5), DateTime.UtcNow.AddSeconds(5));
         Assert.Equal(dto.Date, result.Date);
-        Assert.Equal(userId, result.UserId);
         Assert.Equal(dto.Start, result.TimeSlot.Start);
         Assert.Equal(dto.Start.AddMinutes(30), result.TimeSlot.End);
         Assert.NotNull(result.Patient);
@@ -70,9 +70,7 @@ public class BookingServiceTests
         _bookingRepositoryMock.Verify(
             r =>
                 r.CreateAsync(
-                    It.Is<Booking>(b =>
-                        b.UserId == userId && b.Date == dto.Date && b.TimeSlot.Start == dto.Start
-                    )
+                    It.Is<Booking>(b => b.Date == dto.Date && b.TimeSlot.Start == dto.Start)
                 ),
             Times.Once
         );

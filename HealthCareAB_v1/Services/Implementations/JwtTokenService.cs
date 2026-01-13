@@ -18,7 +18,7 @@ public class JwtTokenService(IOptions<JwtSettings> jwtSettings) : IJwtTokenServi
         jwtSettings.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
 
     /// <inheritdoc />
-    public string GenerateToken(Patient user)
+    public string GenerateToken(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
 

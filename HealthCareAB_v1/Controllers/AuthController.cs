@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.DTOs;
+using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +19,38 @@ public class AuthController(IAuthService authService) : ControllerBase
     /// <summary>
     /// Registers a new user with default User role.
     /// </summary>
-    [HttpPost("register")]
+    [HttpPost("register-patient")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Register([FromBody] RegisterDto request)
+    public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientDto request)
     {
-        var result = await _authService.RegisterAsync(request);
+        var result = await _authService.RegisterPatientAsync(request);
 
         if (!result.Success)
         {
             return Conflict(new { message = result.Message });
         }
+
+        return CreatedAtAction(
+            nameof(CheckAuthentication),
+            new
+            {
+                message = result.Message,
+                username = result.Username,
+                roles = result.Roles,
+            }
+        );
+    }
+
+    /// <summary>
+    /// Registers a new user with default User role.
+    /// </summary>
+    [HttpPost("register-caregiver")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterCaregiver([FromBody] RegisterCaregiverDto request)
+    {
+        var result = await _authService.RegisterCaregiverAsync(request);
 
         return CreatedAtAction(
             nameof(CheckAuthentication),

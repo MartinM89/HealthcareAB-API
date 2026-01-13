@@ -24,7 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         );
 
         modelBuilder
-            .Entity<Patient>()
+            .Entity<User>()
             .Property(e => e.Roles)
             .HasConversion(rolesConverter)
             .HasColumnType("jsonb");
@@ -36,6 +36,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasForeignKey<Review>(r => r.Id);
     }
 
+    public DbSet<User> Users { get; set; }
     public DbSet<Patient> Patients { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<TimeSlot> TimeSlots { get; set; }

@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+namespace Tests.Controllers;
+
 public class BookingControllerCancelBookingTests
 {
     private static AppDbContext CreateInMemoryDb()
@@ -25,7 +27,7 @@ public class BookingControllerCancelBookingTests
         IBookingRepository bookingRepository = new BookingRepository(db);
         IBookingService bookingService = new BookingService(bookingRepository, db);
 
-        var controller = new BookingController(db, bookingService);
+        var controller = new BookingController(bookingService);
 
         var httpContext = new DefaultHttpContext();
 
@@ -50,14 +52,14 @@ public class BookingControllerCancelBookingTests
     {
         using var db = CreateInMemoryDb();
 
-        var patientId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var bookingId = Guid.NewGuid();
-
-        var patient = new Patient
+        var user = new User
         {
-            Id = patientId,
+            Id = userId,
             Username = "p1",
             PasswordHash = "hash",
+            Patient = new Patient { },
         };
 
         var booking = new Booking
@@ -65,16 +67,15 @@ public class BookingControllerCancelBookingTests
             Id = bookingId,
             CreatedAt = DateTime.UtcNow,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
-            UserId = patientId.ToString(),
-            Patient = patient,
+            Patient = user.Patient,
             TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) },
         };
 
-        db.Patients.Add(patient);
+        db.Users.Add(user);
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
 
-        var controller = CreateController(db, patientId);
+        var controller = CreateController(db, userId);
 
         var result = await controller.CancelBooking(bookingId, CancellationToken.None);
 
@@ -83,7 +84,7 @@ public class BookingControllerCancelBookingTests
     }
 
     [Fact]
-    public async Task CancelBooking_NotOwner_ReturnsForbid_AndDoesNotDelete()
+    public async Task CancelBooking_NotOwner_ReturnsForbidden_AndDoesNotDelete()
     {
         using var db = CreateInMemoryDb();
 
@@ -91,11 +92,12 @@ public class BookingControllerCancelBookingTests
         var otherPatientsId = Guid.NewGuid();
         var bookingId = Guid.NewGuid();
 
-        var owner = new Patient
+        var owner = new User
         {
             Id = ownerId,
             Username = "owner",
             PasswordHash = "hash",
+            Patient = new Patient { },
         };
 
         var booking = new Booking
@@ -103,12 +105,11 @@ public class BookingControllerCancelBookingTests
             Id = bookingId,
             CreatedAt = DateTime.UtcNow,
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
-            UserId = ownerId.ToString(),
-            Patient = owner,
+            Patient = owner.Patient,
             TimeSlot = new TimeSlot { Start = new TimeOnly(10, 0) },
         };
 
-        db.Patients.Add(owner);
+        db.Users.Add(owner);
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
 

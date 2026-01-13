@@ -17,21 +17,21 @@ public class UserService(IAppDbContext context) : IUserService
     public async Task<bool> ExistsByUsernameAsync(string username)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
-        return await _context.Patients.AnyAsync(u => u.Username == username);
+        return await _context.Users.AnyAsync(u => u.Username == username);
     }
 
     /// <inheritdoc />
-    public async Task<Patient?> GetUserByUsernameAsync(string username)
+    public async Task<User?> GetUserByUsernameAsync(string username)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(username);
-        return await _context.Patients.FirstOrDefaultAsync(u => u.Username == username);
+        return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
     }
 
     /// <inheritdoc />
-    public async Task CreateUserAsync(Patient patient)
+    public async Task CreateUserAsync(User user)
     {
-        ArgumentNullException.ThrowIfNull(patient);
-        await _context.Patients.AddAsync(patient);
+        ArgumentNullException.ThrowIfNull(user);
+        await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
     }
 

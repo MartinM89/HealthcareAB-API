@@ -9,5 +9,5 @@ public interface IJwtTokenService
     /// </summary>
     /// <param name="user">The user to generate a token for</param>
     /// <returns>The generated JWT token string</returns>
-    string GenerateToken(Patient user);
+    string GenerateToken(User user);
 }
