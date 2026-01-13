@@ -5,7 +5,7 @@ namespace HealthCareAB_v1.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDto> RegisterAsync(RegisterPatientDto registerDto);
+        Task<AuthResponseDto> RegisterPatientAsync(RegisterPatientDto registerDto);
         Task<AuthResponseDto> RegisterCaregiverAsync(RegisterCaregiverDto registerDto);
         Task<(AuthResponseDto response, string? token)> LoginAsync(LoginDto loginDto);
         CookieOptions GetJwtCookieOptions();

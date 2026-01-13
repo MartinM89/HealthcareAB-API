@@ -30,7 +30,7 @@ public class AuthService(
         httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     /// <inheritdoc />
-    public async Task<AuthResponseDto> RegisterAsync(RegisterPatientDto registerDto)
+    public async Task<AuthResponseDto> RegisterPatientAsync(RegisterPatientDto registerDto)
     {
         ArgumentNullException.ThrowIfNull(registerDto);
 

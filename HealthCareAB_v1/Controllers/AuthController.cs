@@ -19,12 +19,12 @@ namespace HealthCareAB_v1.Controllers
         /// <summary>
         /// Registers a new user with default User role.
         /// </summary>
-        [HttpPost("register")]
+        [HttpPost("register-patient")]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Register([FromBody] RegisterPatientDto request)
+        public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientDto request)
         {
-            var result = await _authService.RegisterAsync(request);
+            var result = await _authService.RegisterPatientAsync(request);
 
             if (!result.Success)
             {
