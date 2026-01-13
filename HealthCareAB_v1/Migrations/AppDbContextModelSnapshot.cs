@@ -28,7 +28,7 @@ namespace HealthCareAB_v1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CaregiverDailyScheduleId")
+                    b.Property<Guid>("CaregiverDailyScheduleId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
@@ -212,9 +212,11 @@ namespace HealthCareAB_v1.Migrations
 
             modelBuilder.Entity("HealthCareAB_v1.Models.Booking", b =>
                 {
-                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", null)
+                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", "CaregiverDailySchedule")
                         .WithMany("Bookings")
-                        .HasForeignKey("CaregiverDailyScheduleId");
+                        .HasForeignKey("CaregiverDailyScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HealthCareAB_v1.Models.Patient", "Patient")
                         .WithMany("Bookings")
@@ -227,6 +229,8 @@ namespace HealthCareAB_v1.Migrations
                         .HasForeignKey("TimeSlotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CaregiverDailySchedule");
 
                     b.Navigation("Patient");
 
@@ -283,6 +287,11 @@ namespace HealthCareAB_v1.Migrations
                         .IsRequired();
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HealthCareAB_v1.Models.Caregiver", b =>
+                {
+                    b.Navigation("DailySchedules");
                 });
 
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>
