@@ -9,4 +9,5 @@ public interface IUserService
     Task CreateUserAsync(User user);
     string HashPassword(string password);
     bool VerifyPassword(string enteredPassword, string storedHash);
+    Task<Caregiver?> GetCaregiverByIdAsync(Guid caregiverId);
 }

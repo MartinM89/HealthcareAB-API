@@ -1,4 +1,4 @@
-﻿namespace HealthCareAB_v1.DTOs.Auth;
+namespace HealthCareAB_v1.DTOs.Auth;
 
 public class AuthResponseDto
 {
