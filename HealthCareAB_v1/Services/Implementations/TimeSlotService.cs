@@ -5,13 +5,13 @@ using HealthCareAB_v1.Services.Interfaces;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
-public class TimeSlotService(ITimeSlotRepository repository) : ITimeSlotService
+public class TimeSlotService(ITimeSlotRepository timeSlotRepository) : ITimeSlotService
 {
-    private readonly ITimeSlotRepository _repository = repository;
+    private readonly ITimeSlotRepository _timeSlotRepository = timeSlotRepository;
 
-    public async Task<TimeSlot> GetById(Guid timeSlotId)
+    public async Task<TimeSlot> GetByIdAsync(Guid timeSlotId)
     {
-        return await _repository.GetById(timeSlotId)
+        return await _timeSlotRepository.GetByIdAsync(timeSlotId)
             ?? throw new NotFoundException("Time slot not found");
     }
 }

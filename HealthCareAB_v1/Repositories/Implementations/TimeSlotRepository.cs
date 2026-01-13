@@ -8,7 +8,7 @@ public class TimeSlotRepository(IAppDbContext context) : ITimeSlotRepository
 {
     private readonly IAppDbContext _context = context;
 
-    public async Task<TimeSlot?> GetById(Guid TimeSlotId)
+    public async Task<TimeSlot?> GetByIdAsync(Guid TimeSlotId)
     {
         return await _context.TimeSlots.FirstOrDefaultAsync(t => t.Id == TimeSlotId);
     }

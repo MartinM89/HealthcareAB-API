@@ -4,5 +4,5 @@ namespace HealthCareAB_v1.Services.Interfaces;
 
 public interface ITimeSlotService
 {
-    Task<TimeSlot> GetById(Guid timeSlotId);
+    Task<TimeSlot> GetByIdAsync(Guid timeSlotId);
 }
