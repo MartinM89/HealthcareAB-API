@@ -13,6 +13,6 @@ public class CaregiverController() : ControllerBase
     [HttpPost]
     public IActionResult WorkingSchedule(CreateCaregiverDailyScheduleDto dto)
     {
-        return Ok();
+        return Ok(dto);
     }
 }
