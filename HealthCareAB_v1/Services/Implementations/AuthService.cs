@@ -1,5 +1,4 @@
 ﻿using HealthCareAB_v1.Configuration;
-using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;

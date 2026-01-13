@@ -64,4 +64,17 @@ public class BookingController(IBookingService bookingService) : ControllerBase
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         return Guid.TryParse(id, out userId);
     }
+
+    [Authorize(Roles = Roles.Patient)]
+    [HttpGet("mybookings")]
+    public async Task<ActionResult<List<BookingResponseDto>>> GetMyBookings(CancellationToken ct)
+    {
+        if(!TryGetUserId(out var patientId))
+        {
+            return Unauthorized();  
+        }
+
+        var result = await _bookingService.GetMyBookingsAsync(patientId, ct);
+        return Ok(result);
+    }
 }

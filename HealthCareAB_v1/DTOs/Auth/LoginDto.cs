@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HealthCareAB_v1.DTOs;
+namespace HealthCareAB_v1.DTOs.Auth;
 
 public class LoginDto
 {
