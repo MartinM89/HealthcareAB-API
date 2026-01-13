@@ -1,0 +1,106 @@
+# Top-most EditorConfig file
+root = true
+
+########################################
+# C# files
+########################################
+[*.cs]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Organize usings
+dotnet_sort_system_directives_first = true
+
+########################################
+# .NET Code Style
+########################################
+
+# var preferences
+csharp_style_var_for_built_in_types = true
+csharp_style_var_when_type_is_apparent = true
+csharp_style_var_elsewhere = true
+
+# Expression-bodied members
+csharp_style_expression_bodied_methods = false:none
+csharp_style_expression_bodied_constructors = false:none
+csharp_style_expression_bodied_operators = false:none
+csharp_style_expression_bodied_properties = false:none
+csharp_style_expression_bodied_indexers = false:none
+csharp_style_expression_bodied_accessors = false:none
+
+# Namespace preferences
+csharp_style_namespace_declarations = file_scoped
+
+# Pattern matching
+csharp_style_prefer_switch_expression = false:none
+csharp_style_prefer_primary_constructors = true
+dotnet_style_prefer_conditional_expression_over_return = false:none
+csharp_style_prefer_conditional_expression = false:none
+
+########################################
+# Formatting
+########################################
+
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+
+csharp_space_after_cast = false
+csharp_space_between_parentheses = false
+
+########################################
+# Naming
+########################################
+
+# Interfaces must start with I
+dotnet_naming_rule.interface_should_be_prefixed_with_i.severity = warning
+dotnet_naming_rule.interface_should_be_prefixed_with_i.symbols = interface_symbols
+dotnet_naming_rule.interface_should_be_prefixed_with_i.style = prefix_i_style
+
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
+dotnet_naming_style.prefix_i_style.required_prefix = I
+dotnet_naming_style.prefix_i_style.capitalization = pascal_case
+
+########################################
+# Analyzer defaults
+########################################
+
+dotnet_analyzer_diagnostic.severity = warning
+dotnet_diagnostic.IDE0058.severity = none # Ignore unused expression value for service registrations
+dotnet_diagnostic.IDE0055.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1001.severity = none
+
+
+########################################
+# XML / .csproj files
+########################################
+
+[*.{csproj,xml}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+########################################
+# JSON files
+########################################
+
+[*.json]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true

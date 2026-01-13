@@ -3,6 +3,7 @@ using System;
 using HealthCareAB_v1.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HealthCareAB_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260112134235_AlteredUserPatientCaregiverRelationships")]
+    partial class AlteredUserPatientCaregiverRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,10 +44,17 @@ namespace HealthCareAB_v1.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<Guid>("PatientUserId")
+                    b.Property<Guid?>("PatientUserId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TimeSlotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId1")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -54,6 +64,8 @@ namespace HealthCareAB_v1.Migrations
                     b.HasIndex("PatientUserId");
 
                     b.HasIndex("TimeSlotId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Bookings");
                 });
@@ -216,11 +228,9 @@ namespace HealthCareAB_v1.Migrations
                         .WithMany("Bookings")
                         .HasForeignKey("CaregiverDailyScheduleId");
 
-                    b.HasOne("HealthCareAB_v1.Models.Patient", "Patient")
+                    b.HasOne("HealthCareAB_v1.Models.Patient", null)
                         .WithMany("Bookings")
-                        .HasForeignKey("PatientUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PatientUserId");
 
                     b.HasOne("HealthCareAB_v1.Models.TimeSlot", "TimeSlot")
                         .WithMany("Bookings")
@@ -228,9 +238,15 @@ namespace HealthCareAB_v1.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Patient");
+                    b.HasOne("HealthCareAB_v1.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("TimeSlot");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HealthCareAB_v1.Models.Caregiver", b =>

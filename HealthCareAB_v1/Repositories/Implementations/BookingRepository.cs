@@ -25,11 +25,23 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     }
 
     public Task<Booking?> GetByIdWithPatientAsync(Guid bookingId, CancellationToken ct) =>
-        _context.Bookings.Include(b => b.Patient).FirstOrDefaultAsync(b => b.Id == bookingId, ct);
+        _context
+            .Bookings.Include(b => b.Patient)
+            .ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
 
     public async Task DeleteAsync(Booking booking, CancellationToken ct)
     {
         _context.Bookings.Remove(booking);
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task<List<Booking>> GetForPatientAsync(Guid patientId, CancellationToken ct) =>
+        await _context
+            .Bookings.AsNoTracking()
+            .Include(b => b.TimeSlot)
+            .Where(b => b.Patient.UserId == patientId)
+            .OrderBy(b => b.Date)
+            .ThenBy(b => b.TimeSlot.Start)
+            .ToListAsync(ct);
 }

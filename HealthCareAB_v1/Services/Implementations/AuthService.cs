@@ -1,5 +1,5 @@
 ﻿using HealthCareAB_v1.Configuration;
-using HealthCareAB_v1.DTOs;
+using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
@@ -14,8 +14,8 @@ public class AuthService(
     IUserService userService,
     IJwtTokenService jwtTokenService,
     IOptions<JwtSettings> jwtSettings,
-    IWebHostEnvironment environment,
-    IHttpContextAccessor httpContextAccessor
+    IWebHostEnvironment environment
+// IHttpContextAccessor httpContextAccessor
 ) : IAuthService
 {
     private readonly IUserService _userService =
@@ -25,11 +25,12 @@ public class AuthService(
     private readonly JwtSettings _jwtSettings =
         jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
     private readonly bool _isDevelopment = environment?.IsDevelopment() ?? false;
-    private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+
+    // private readonly IHttpContextAccessor _httpContextAccessor =
+    //     httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     /// <inheritdoc />
-    public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
+    public async Task<AuthResponseDto> RegisterPatientAsync(RegisterPatientDto registerDto)
     {
         ArgumentNullException.ThrowIfNull(registerDto);
 
@@ -44,21 +45,51 @@ public class AuthService(
         // Determine roles with security check
         var roles = DetermineUserRoles(registerDto.Roles);
 
-        var patient = new Patient
+        var user = new User
         {
             Username = registerDto.Username,
             PasswordHash = _userService.HashPassword(registerDto.Password),
             Roles = roles,
+            Patient = new Patient { },
         };
 
-        await _userService.CreateUserAsync(patient);
+        await _userService.CreateUserAsync(user);
 
         return new AuthResponseDto
         {
             Success = true,
             Message = "User registered successfully",
-            Username = patient.Username,
-            Roles = patient.Roles,
+            Username = user.Username,
+            Roles = user.Roles,
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<AuthResponseDto> RegisterCaregiverAsync(RegisterCaregiverDto registerDto)
+    {
+        ArgumentNullException.ThrowIfNull(registerDto);
+
+        if (await _userService.ExistsByUsernameAsync(registerDto.Username))
+        {
+            return new AuthResponseDto { Success = false, Message = "Username is already taken" };
+        }
+
+        var user = new User
+        {
+            Username = registerDto.Username,
+            PasswordHash = _userService.HashPassword(registerDto.Password),
+            Roles = [Roles.Caregiver],
+            Caregiver = new Caregiver { },
+        };
+
+        await _userService.CreateUserAsync(user);
+
+        return new AuthResponseDto
+        {
+            Success = true,
+            Message = "User registered successfully",
+            Username = user.Username,
+            Roles = user.Roles,
         };
     }
 
