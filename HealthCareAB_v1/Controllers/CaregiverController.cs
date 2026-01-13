@@ -1,5 +1,6 @@
 using HealthCareAB_v1.DTOs.Caregiver;
 using HealthCareAB_v1.Models;
+using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,17 @@ namespace HealthCareAB_v1.Controllers;
 [Authorize(Roles = Roles.Caregiver)]
 [ApiController]
 [Route("api/[controller]")]
-public class CaregiverController() : ControllerBase
+public class CaregiverController(ICaregiverDailyScheduleService caregiverDailyScheduleService)
+    : ControllerBase
 {
+    private readonly ICaregiverDailyScheduleService _caregiverDailyScheduleService =
+        caregiverDailyScheduleService;
+
     [HttpPost]
-    public IActionResult CreateDailySchedule(CreateCaregiverDailyScheduleDto dto)
+    public async Task<IActionResult> CreateDailyScheduleAsync(CreateCaregiverDailyScheduleDto dto)
     {
-        return Ok(dto);
+        await _caregiverDailyScheduleService.CreateScheduleAsync(dto);
+
+        return Ok();
     }
 }

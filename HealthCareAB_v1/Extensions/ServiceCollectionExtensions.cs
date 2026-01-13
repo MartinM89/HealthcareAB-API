@@ -21,6 +21,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<ICaregiverDailyScheduleService, CaregiverDailyScheduleService>();
+        services.AddScoped<ICaregiverDailyScheduleRepository, CaregiverDailyScheduleRepository>();
+        services.AddScoped<ICaregiverStatusService, CaregiverStatusService>();
+        services.AddScoped<ICaregiverStatusRepository, CaregiverStatusRepository>();
         return services;
     }
 
