@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<ITimeSlotService, TimeSlotService>();
-        services.AddScoped<ITimeSlotRepository, ITimeSlotRepository>();
+        services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
         return services;
     }
 
