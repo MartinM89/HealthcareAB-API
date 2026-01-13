@@ -1,5 +1,6 @@
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
+using HealthCareAB_v1.Services.Results;
 
 namespace HealthCareAB_v1.Services.Interfaces;
 

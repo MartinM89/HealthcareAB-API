@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthCareAB_v1.Models;
 
-public abstract class User
+public class User
 {
     public Guid Id { get; set; }
 
@@ -13,9 +13,13 @@ public abstract class User
 
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
+
+    [EmailAddress]
     public string Email { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+
+    [Phone]
     public string PhoneNumber { get; set; } = string.Empty;
 
     /// <summary>
@@ -24,4 +28,7 @@ public abstract class User
     /// </summary>
     [Column(TypeName = "jsonb")]
     public List<string> Roles { get; set; } = [];
+
+    public Patient? Patient { get; set; }
+    public Caregiver? Caregiver { get; set; }
 }

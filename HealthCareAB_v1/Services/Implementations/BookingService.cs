@@ -4,6 +4,7 @@ using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
+using HealthCareAB_v1.Services.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
@@ -17,9 +18,16 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
     public async Task<Booking> CreateAsync(string userId, CreateBookingDto dto)
     {
-        var patient =
-            await _appDbContext.Patients.FirstOrDefaultAsync(p => p.Id == Guid.Parse(userId))
+        var user =
+            await _appDbContext
+                .Users.Include(u => u.Patient)
+                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
             ?? throw new NotFoundException("Patient not found");
+
+        if (user.Patient is null)
+        {
+            throw new NotFoundException("Patient not found");
+        }
 
         var booking = new Booking
         {
@@ -27,27 +35,34 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             Comment = dto.Comment ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
-            UserId = userId,
             TimeSlot = new TimeSlot
             {
                 Start = dto.Start,
                 End = SetEnd(dto.Start, durationInMinutes),
             },
-            Patient = patient,
+            Patient = user.Patient,
         };
 
         return await _bookingRepository.CreateAsync(booking);
     }
 
-    public async Task<CancelBookingResult> CancelAsync(Guid bookingId, Guid patentId, CancellationToken ct)
+    public async Task<CancelBookingResult> CancelAsync(
+        Guid bookingId,
+        Guid patientId,
+        CancellationToken ct
+    )
     {
         var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
 
-        if(booking == null)
+        if (booking == null)
+        {
             return CancelBookingResult.NotFound;
+        }
 
-        if(booking.Patient == null || booking.Patient.Id != patentId)
+        if (booking.Patient == null || booking.Patient.UserId != patientId)
+        {
             return CancelBookingResult.Forbidden;
+        }
 
         await _bookingRepository.DeleteAsync(booking, ct);
         return CancelBookingResult.Success;
@@ -57,7 +72,6 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
     {
         var finalTime = timeLength;
         return start.AddMinutes(finalTime);
-
     }
 
     public async Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct)

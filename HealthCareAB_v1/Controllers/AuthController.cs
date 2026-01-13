@@ -1,115 +1,133 @@
 ﻿using System.Security.Claims;
 using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.DTOs;
+using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HealthCareAB_v1.Controllers
+namespace HealthCareAB_v1.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Produces("application/json")]
-    public class AuthController(IAuthService authService) : ControllerBase
+    private readonly IAuthService _authService =
+        authService ?? throw new ArgumentNullException(nameof(authService));
+
+    /// <summary>
+    /// Registers a new user with default User role.
+    /// </summary>
+    [HttpPost("register-patient")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientDto request)
     {
-        private readonly IAuthService _authService =
-            authService ?? throw new ArgumentNullException(nameof(authService));
+        var result = await _authService.RegisterPatientAsync(request);
 
-        /// <summary>
-        /// Registers a new user with default User role.
-        /// </summary>
-        [HttpPost("register")]
-        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Register([FromBody] RegisterDto request)
+        if (!result.Success)
         {
-            var result = await _authService.RegisterAsync(request);
+            return Conflict(new { message = result.Message });
+        }
 
-            if (!result.Success)
+        return CreatedAtAction(
+            nameof(CheckAuthentication),
+            new
             {
-                return Conflict(new { message = result.Message });
+                message = result.Message,
+                username = result.Username,
+                roles = result.Roles,
             }
+        );
+    }
 
-            return CreatedAtAction(
-                nameof(CheckAuthentication),
-                new
-                {
-                    message = result.Message,
-                    username = result.Username,
-                    roles = result.Roles,
-                }
-            );
-        }
+    /// <summary>
+    /// Registers a new user with default User role.
+    /// </summary>
+    [HttpPost("register-caregiver")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterCaregiver([FromBody] RegisterCaregiverDto request)
+    {
+        var result = await _authService.RegisterCaregiverAsync(request);
 
-        /// <summary>
-        /// Authenticates a user and sets JWT cookie.
-        /// </summary>
-        [HttpPost("login")]
-        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] LoginDto request)
-        {
-            var (result, token) = await _authService.LoginAsync(request);
-
-            if (!result.Success || string.IsNullOrEmpty(token))
+        return CreatedAtAction(
+            nameof(CheckAuthentication),
+            new
             {
-                return Unauthorized(new { message = result.Message });
+                message = result.Message,
+                username = result.Username,
+                roles = result.Roles,
             }
+        );
+    }
 
-            var cookieOptions = _authService.GetJwtCookieOptions();
-            HttpContext.Response.Cookies.Append(CookieNames.Jwt, token, cookieOptions);
+    /// <summary>
+    /// Authenticates a user and sets JWT cookie.
+    /// </summary>
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Login([FromBody] LoginDto request)
+    {
+        var (result, token) = await _authService.LoginAsync(request);
 
-            return Ok(
-                new
-                {
-                    message = result.Message,
-                    username = result.Username,
-                    roles = result.Roles,
-                }
-            );
+        if (!result.Success || string.IsNullOrEmpty(token))
+        {
+            return Unauthorized(new { message = result.Message });
         }
 
-        /// <summary>
-        /// Logs out the current user by clearing the JWT cookie.
-        /// </summary>
-        [HttpPost("logout")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Logout()
-        {
-            var cookieOptions = _authService.GetClearCookieOptions();
-            HttpContext.Response.Cookies.Append(CookieNames.Jwt, string.Empty, cookieOptions);
+        var cookieOptions = _authService.GetJwtCookieOptions();
+        HttpContext.Response.Cookies.Append(CookieNames.Jwt, token, cookieOptions);
 
-            return Ok(new { message = "Logged out successfully" });
-        }
-
-        /// <summary>
-        /// Checks if the current request is authenticated.
-        /// </summary>
-        [Authorize]
-        [HttpGet("check")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult CheckAuthentication()
-        {
-            if (User?.Identity?.IsAuthenticated != true)
+        return Ok(
+            new
             {
-                return Unauthorized(new { message = "Not authenticated" });
+                message = result.Message,
+                username = result.Username,
+                roles = result.Roles,
             }
+        );
+    }
 
-            var username = User.Identity.Name ?? "Unknown";
-            var roles = User
-                .Claims.Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value)
-                .ToList();
+    /// <summary>
+    /// Logs out the current user by clearing the JWT cookie.
+    /// </summary>
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult Logout()
+    {
+        var cookieOptions = _authService.GetClearCookieOptions();
+        HttpContext.Response.Cookies.Append(CookieNames.Jwt, string.Empty, cookieOptions);
 
-            return Ok(
-                new
-                {
-                    message = "Authenticated",
-                    username,
-                    roles,
-                }
-            );
+        return Ok(new { message = "Logged out successfully" });
+    }
+
+    /// <summary>
+    /// Checks if the current request is authenticated.
+    /// </summary>
+    [Authorize]
+    [HttpGet("check")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult CheckAuthentication()
+    {
+        if (User?.Identity?.IsAuthenticated != true)
+        {
+            return Unauthorized(new { message = "Not authenticated" });
         }
+
+        var username = User.Identity.Name ?? "Unknown";
+        var roles = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+
+        return Ok(
+            new
+            {
+                message = "Authenticated",
+                username,
+                roles,
+            }
+        );
     }
 }
