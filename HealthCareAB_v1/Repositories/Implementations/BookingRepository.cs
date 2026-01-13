@@ -31,8 +31,8 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.Bookings
             .AsNoTracking()
             .Include(b => b.TimeSlot)
-            .Where(b => b.Patient.Id == patientId)
-            .OrderByDescending(b => b.Date)
-            .ThenByDescending(b => b.TimeSlot.Start)
+            .Where(b => b.Patient.UserId == patientId)
+            .OrderBy(b => b.Date)
+            .ThenBy(b => b.TimeSlot.Start)
             .ToListAsync(ct);
 }

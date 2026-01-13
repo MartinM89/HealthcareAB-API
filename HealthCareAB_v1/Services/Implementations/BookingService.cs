@@ -78,7 +78,7 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
     {
         var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
 
-        return bookings.Select(b => new BookingResponseDto
+        return [.. bookings.Select(b => new BookingResponseDto
         {
             Id = b.Id,
             Comment = b.Comment,
@@ -86,6 +86,6 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             Date = b.Date,
             Start = b.TimeSlot.Start,
             End = b.TimeSlot.End,
-        }).ToList();
+        })];
     }
 }
