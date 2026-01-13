@@ -3,7 +3,6 @@ using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
-using HealthCareAB_v1.Services;
 using HealthCareAB_v1.Services.Implementations;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<ITimeSlotService, TimeSlotService>();
+        services.AddScoped<ITimeSlotRepository, ITimeSlotRepository>();
         return services;
     }
 
