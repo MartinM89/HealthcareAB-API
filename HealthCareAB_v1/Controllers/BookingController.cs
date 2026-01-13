@@ -19,7 +19,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
         return User?.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 
-    [HttpPost]
+    [HttpPost("create-booking")]
     public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
     {
         var userId = GetUserId();
@@ -69,9 +69,9 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     [HttpGet("mybookings")]
     public async Task<ActionResult<List<BookingResponseDto>>> GetMyBookings(CancellationToken ct)
     {
-        if(!TryGetUserId(out var patientId))
+        if (!TryGetUserId(out var patientId))
         {
-            return Unauthorized();  
+            return Unauthorized();
         }
 
         var result = await _bookingService.GetMyBookingsAsync(patientId, ct);
