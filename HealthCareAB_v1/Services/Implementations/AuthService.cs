@@ -14,8 +14,8 @@ public class AuthService(
     IUserService userService,
     IJwtTokenService jwtTokenService,
     IOptions<JwtSettings> jwtSettings,
-    IWebHostEnvironment environment,
-    IHttpContextAccessor httpContextAccessor
+    IWebHostEnvironment environment
+// IHttpContextAccessor httpContextAccessor
 ) : IAuthService
 {
     private readonly IUserService _userService =
@@ -25,8 +25,9 @@ public class AuthService(
     private readonly JwtSettings _jwtSettings =
         jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
     private readonly bool _isDevelopment = environment?.IsDevelopment() ?? false;
-    private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+
+    // private readonly IHttpContextAccessor _httpContextAccessor =
+    //     httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     /// <inheritdoc />
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)

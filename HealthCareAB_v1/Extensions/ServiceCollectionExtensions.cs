@@ -10,88 +10,83 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HealthCareAB_v1.Extensions
+namespace HealthCareAB_v1.Extensions;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-        {
-            services.AddHttpContextAccessor(); // Required for AuthService to check current user
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IJwtTokenService, JwtTokenService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IBookingRepository, BookingRepository>();
-            services.AddScoped<IBookingService, BookingService>();
-            return services;
-        }
+        services.AddHttpContextAccessor(); // Required for AuthService to check current user
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IBookingService, BookingService>();
+        return services;
+    }
 
-        public static IServiceCollection AddDatabase(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
-        {
-            var dbSettings =
-                configuration.GetSection(DbSettings.SectionName).Get<DbSettings>()
-                ?? throw new InvalidOperationException(
-                    "DbConnectionStrings configuration section is missing"
-                );
-
-            services.Configure<DbSettings>(configuration.GetSection(DbSettings.SectionName));
-
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(dbSettings.ConnectionString)
+    public static IServiceCollection AddDatabase(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        var dbSettings =
+            configuration.GetSection(DbSettings.SectionName).Get<DbSettings>()
+            ?? throw new InvalidOperationException(
+                "DbConnectionStrings configuration section is missing"
             );
 
-            services.AddScoped<IAppDbContext>(provider =>
-                provider.GetRequiredService<AppDbContext>()
-            );
+        services.Configure<DbSettings>(configuration.GetSection(DbSettings.SectionName));
 
-            return services;
-        }
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(dbSettings.ConnectionString)
+        );
 
-        public static IServiceCollection AddJwtAuthentication(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
-        {
-            // Bind and validate JWT settings
-            var jwtSettings =
-                configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
-                ?? throw new InvalidOperationException(
-                    "JwtSettings configuration section is missing"
-                );
+        services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
-            services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        return services;
+    }
 
-            services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+    public static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        // Bind and validate JWT settings
+        var jwtSettings =
+            configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+            ?? throw new InvalidOperationException("JwtSettings configuration section is missing");
+
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings.Secret)
-                        ),
-                    };
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings.Secret)
+                    ),
+                };
 
-                    // Read JWT from HttpOnly cookie
-                    options.Events = new JwtBearerEvents
+                // Read JWT from HttpOnly cookie
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        OnMessageReceived = context =>
-                        {
-                            context.Token = context.Request.Cookies[CookieNames.Jwt];
-                            return Task.CompletedTask;
-                        },
-                    };
-                });
+                        context.Token = context.Request.Cookies[CookieNames.Jwt];
+                        return Task.CompletedTask;
+                    },
+                };
+            });
 
-            return services;
-        }
+        return services;
     }
 }
