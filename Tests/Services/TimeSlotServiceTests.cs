@@ -22,13 +22,13 @@ public class TimeSlotServiceTests
     {
         // Arrange
         var timeSlotId = Guid.NewGuid();
-        var currentTime = new TimeOnly();
+        var referenceTime = new TimeOnly(10, 00);
 
         var newTimeSlot = new TimeSlot
         {
             Id = timeSlotId,
-            Start = currentTime,
-            End = currentTime.AddMinutes(30),
+            Start = referenceTime,
+            End = referenceTime.AddMinutes(30),
             Bookings = [],
         };
 
