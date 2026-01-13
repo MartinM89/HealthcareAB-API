@@ -12,7 +12,9 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
 
     public async Task<Caregiver?> GetCaregiverByIdAsync(Guid caregiverId)
     {
-        var caregiver = await _context.Caregivers.FirstOrDefaultAsync(c => c.Id == caregiverId);
+        var caregiver = await _context.Caregivers.FirstOrDefaultAsync(c =>
+            c.User.Id == caregiverId
+        );
 
         return caregiver;
     }
