@@ -11,7 +11,7 @@ namespace HealthCareAB_v1.Controllers;
 public class CaregiverController() : ControllerBase
 {
     [HttpPost]
-    public IActionResult WorkingSchedule(CreateCaregiverDailyScheduleDto dto)
+    public IActionResult CreateDailySchedule(CreateCaregiverDailyScheduleDto dto)
     {
         return Ok(dto);
     }
