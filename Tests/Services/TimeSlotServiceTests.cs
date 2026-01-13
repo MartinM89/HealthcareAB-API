@@ -1,27 +1,18 @@
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
-using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Implementations;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace Tests.Services;
 
 public class TimeSlotServiceTests
 {
-    private readonly DbContextOptions<AppDbContext> _dbContextOptions;
-    private readonly AppDbContext _context;
     private readonly Mock<ITimeSlotRepository> _timeSlotRepositoryMock;
     private readonly TimeSlotService _timeSlotService;
 
     public TimeSlotServiceTests()
     {
-        _dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new AppDbContext(_dbContextOptions);
         _timeSlotRepositoryMock = new Mock<ITimeSlotRepository>();
         _timeSlotService = new TimeSlotService(_timeSlotRepositoryMock.Object);
     }
@@ -41,9 +32,6 @@ public class TimeSlotServiceTests
             Bookings = [],
         };
 
-        _context.TimeSlots.Add(newTimeSlot);
-        await _context.SaveChangesAsync();
-
         _timeSlotRepositoryMock.Setup(r => r.GetByIdAsync(timeSlotId)).ReturnsAsync(newTimeSlot);
 
         // Act
@@ -57,7 +45,7 @@ public class TimeSlotServiceTests
         Assert.Equal(newTimeSlot.Bookings, result.Bookings);
         Assert.Empty(result.Bookings);
 
-        _timeSlotRepositoryMock.Verify(x => x.GetByIdAsync(timeSlotId), Times.Once);
+        _timeSlotRepositoryMock.Verify(r => r.GetByIdAsync(timeSlotId), Times.Once);
     }
 
     [Fact]
@@ -66,12 +54,39 @@ public class TimeSlotServiceTests
         // Arrange
         var timeSlotId = Guid.NewGuid();
 
-        // Act/Assert
+        // Act
+        _timeSlotRepositoryMock
+            .Setup(r => r.GetByIdAsync(timeSlotId))
+            .ReturnsAsync((TimeSlot?)null);
+
+        // Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(
             () => _timeSlotService.GetByIdAsync(timeSlotId)
         );
+
         Assert.Equal("Time slot not found", exception.Message);
 
-        _timeSlotRepositoryMock.Verify(x => x.GetByIdAsync(timeSlotId), Times.Once);
+        _timeSlotRepositoryMock.Verify(r => r.GetByIdAsync(timeSlotId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_GuidIsEmpty_ThrowValidationException()
+    {
+        // Arrange
+        var timeSlotId = Guid.Empty;
+
+        // Act
+        _timeSlotRepositoryMock
+            .Setup(r => r.GetByIdAsync(timeSlotId))
+            .ReturnsAsync((TimeSlot?)null);
+
+        // Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _timeSlotService.GetByIdAsync(timeSlotId)
+        );
+
+        Assert.Equal("Guid can't be empty", exception.Message);
+
+        _timeSlotRepositoryMock.Verify(r => r.GetByIdAsync(timeSlotId), Times.Never);
     }
 }
