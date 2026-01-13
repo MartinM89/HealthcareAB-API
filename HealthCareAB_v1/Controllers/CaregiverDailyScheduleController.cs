@@ -9,16 +9,17 @@ namespace HealthCareAB_v1.Controllers;
 [Authorize(Roles = Roles.Caregiver)]
 [ApiController]
 [Route("api/[controller]")]
-public class CaregiverController(ICaregiverDailyScheduleService caregiverDailyScheduleService)
-    : ControllerBase
+public class CaregiverDailyScheduleController(
+    ICaregiverDailyScheduleService caregiverDailyScheduleService
+) : ControllerBase
 {
     private readonly ICaregiverDailyScheduleService _caregiverDailyScheduleService =
         caregiverDailyScheduleService;
 
     [HttpPost]
-    public async Task<IActionResult> CreateDailyScheduleAsync(CreateCaregiverDailyScheduleDto dto)
+    public async Task<IActionResult> CreateAsync(CreateCaregiverDailyScheduleDto dto)
     {
-        await _caregiverDailyScheduleService.CreateScheduleAsync(dto);
+        await _caregiverDailyScheduleService.CreateAsync(dto);
 
         return Ok();
     }

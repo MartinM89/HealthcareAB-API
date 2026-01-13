@@ -8,7 +8,7 @@ public class CaregiverDailyScheduleRepository(AppDbContext context)
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<CaregiverDailySchedule> CreateScheduleAsync(
+    public async Task<CaregiverDailySchedule> CreateAsync(
         CaregiverDailySchedule caregiverDailySchedule
     )
     {

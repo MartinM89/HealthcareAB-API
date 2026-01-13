@@ -4,5 +4,5 @@ namespace HealthCareAB_v1.Services.Interfaces;
 
 public interface ICaregiverStatusService
 {
-    Task<CaregiverStatus> GetStatuseAsync(Guid statusId);
+    Task<CaregiverStatus> GetByIdAsync(Guid statusId);
 }

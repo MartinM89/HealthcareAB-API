@@ -5,5 +5,5 @@ namespace HealthCareAB_v1.Services.Interfaces;
 
 public interface ICaregiverDailyScheduleService
 {
-    Task<CaregiverDailySchedule> CreateScheduleAsync(CreateCaregiverDailyScheduleDto dto);
+    Task<CaregiverDailySchedule> CreateAsync(CreateCaregiverDailyScheduleDto dto);
 }

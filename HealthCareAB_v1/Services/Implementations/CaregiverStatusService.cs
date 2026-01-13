@@ -11,7 +11,7 @@ public class CaregiverStatusService(ICaregiverStatusRepository caregiverStatusRe
     private readonly ICaregiverStatusRepository _caregiverStatusRepository =
         caregiverStatusRepository;
 
-    public async Task<CaregiverStatus> GetStatuseAsync(Guid statusId)
+    public async Task<CaregiverStatus> GetByIdAsync(Guid statusId)
     {
         if (statusId == Guid.Empty)
         {

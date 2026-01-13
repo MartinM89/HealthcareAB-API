@@ -18,9 +18,7 @@ public class CaregiverDailyScheduleService(
     private readonly ICaregiverDailyScheduleRepository _caregiverDailyScheduleRepository =
         caregiverDailyScheduleRepository;
 
-    public async Task<CaregiverDailySchedule> CreateScheduleAsync(
-        CreateCaregiverDailyScheduleDto dto
-    )
+    public async Task<CaregiverDailySchedule> CreateAsync(CreateCaregiverDailyScheduleDto dto)
     {
         if (dto.Date > DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)))
         {
@@ -54,6 +52,6 @@ public class CaregiverDailyScheduleService(
             CaregiverStatus = status,
         };
 
-        return await _caregiverDailyScheduleRepository.CreateScheduleAsync(dailySchedule);
+        return await _caregiverDailyScheduleRepository.CreateAsync(dailySchedule);
     }
 }
