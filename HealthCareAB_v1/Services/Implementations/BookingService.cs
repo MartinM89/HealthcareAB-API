@@ -4,6 +4,7 @@ using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
+using HealthCareAB_v1.Services.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
@@ -47,17 +48,21 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
     public async Task<CancelBookingResult> CancelAsync(
         Guid bookingId,
-        Guid patentId,
+        Guid patientId,
         CancellationToken ct
     )
     {
         var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
 
         if (booking == null)
+        {
             return CancelBookingResult.NotFound;
+        }
 
-        if (booking.Patient == null || booking.Patient.User.Id != patentId)
+        if (booking.Patient == null || booking.Patient.UserId != patientId)
+        {
             return CancelBookingResult.Forbidden;
+        }
 
         await _bookingRepository.DeleteAsync(booking, ct);
         return CancelBookingResult.Success;

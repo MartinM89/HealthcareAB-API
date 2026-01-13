@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+namespace Tests.Controllers;
+
 public class BookingControllerCancelBookingTests
 {
     private static AppDbContext CreateInMemoryDb()
@@ -25,7 +27,7 @@ public class BookingControllerCancelBookingTests
         IBookingRepository bookingRepository = new BookingRepository(db);
         IBookingService bookingService = new BookingService(bookingRepository, db);
 
-        var controller = new BookingController(db, bookingService);
+        var controller = new BookingController(bookingService);
 
         var httpContext = new DefaultHttpContext();
 
