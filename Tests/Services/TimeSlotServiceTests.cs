@@ -18,7 +18,7 @@ public class TimeSlotServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_TimeSlotNotNull_ReturnTimeSlot()
+    public async Task GetByIdAsync_WithValidId_ReturnTimeSlot()
     {
         // Arrange
         var timeSlotId = Guid.NewGuid();
@@ -49,7 +49,7 @@ public class TimeSlotServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_TimeSlotIsNull_ThrowNotFoundException()
+    public async Task GetByIdAsync_WithNonExistentId_ThrowNotFoundException()
     {
         // Arrange
         var timeSlotId = Guid.NewGuid();
@@ -70,7 +70,7 @@ public class TimeSlotServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_GuidIsEmpty_ThrowValidationException()
+    public async Task GetByIdAsync_WithEmptyGuid_ThrowValidationException()
     {
         // Arrange
         var timeSlotId = Guid.Empty;
