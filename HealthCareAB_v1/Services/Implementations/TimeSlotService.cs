@@ -11,6 +11,11 @@ public class TimeSlotService(ITimeSlotRepository timeSlotRepository) : ITimeSlot
 
     public async Task<TimeSlot> GetByIdAsync(Guid timeSlotId)
     {
+        if (timeSlotId == Guid.Empty)
+        {
+            throw new ValidationException("Guid can't be empty");
+        }
+
         return await _timeSlotRepository.GetByIdAsync(timeSlotId)
             ?? throw new NotFoundException("Time slot not found");
     }
