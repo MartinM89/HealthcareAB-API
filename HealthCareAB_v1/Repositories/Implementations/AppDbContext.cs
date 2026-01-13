@@ -29,7 +29,7 @@ namespace HealthCareAB_v1.Repositories.Implementations
             );
 
             modelBuilder
-                .Entity<Patient>()
+                .Entity<User>()
                 .Property(e => e.Roles)
                 .HasConversion(rolesConverter)
                 .HasColumnType("jsonb");
@@ -41,6 +41,7 @@ namespace HealthCareAB_v1.Repositories.Implementations
                 .HasForeignKey<Review>(r => r.Id);
         }
 
+        public DbSet<User> Users { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }

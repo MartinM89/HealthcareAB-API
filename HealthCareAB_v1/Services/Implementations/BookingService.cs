@@ -17,9 +17,16 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
     public async Task<Booking> CreateAsync(string userId, CreateBookingDto dto)
     {
-        var patient =
-            await _appDbContext.Patients.FirstOrDefaultAsync(p => p.Id == Guid.Parse(userId))
+        var user =
+            await _appDbContext
+                .Users.Include(u => u.Patient)
+                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
             ?? throw new NotFoundException("Patient not found");
+
+        if (user.Patient is null)
+        {
+            throw new NotFoundException("Patient not found");
+        }
 
         var booking = new Booking
         {
@@ -27,26 +34,29 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             Comment = dto.Comment ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
-            UserId = userId,
             TimeSlot = new TimeSlot
             {
                 Start = dto.Start,
                 End = SetEnd(dto.Start, durationInMinutes),
             },
-            Patient = patient,
+            Patient = user.Patient,
         };
 
         return await _bookingRepository.CreateAsync(booking);
     }
 
-    public async Task<CancelBookingResult> CancelAsync(Guid bookingId, Guid patentId, CancellationToken ct)
+    public async Task<CancelBookingResult> CancelAsync(
+        Guid bookingId,
+        Guid patentId,
+        CancellationToken ct
+    )
     {
         var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
 
-        if(booking == null)
+        if (booking == null)
             return CancelBookingResult.NotFound;
 
-        if(booking.Patient == null || booking.Patient.Id != patentId)
+        if (booking.Patient == null || booking.Patient.User.Id != patentId)
             return CancelBookingResult.Forbidden;
 
         await _bookingRepository.DeleteAsync(booking, ct);
@@ -57,6 +67,5 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
     {
         var finalTime = timeLength;
         return start.AddMinutes(finalTime);
-
     }
 }
