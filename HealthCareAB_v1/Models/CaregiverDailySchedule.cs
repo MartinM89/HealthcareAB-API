@@ -8,7 +8,7 @@ public class CaregiverDailySchedule
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
 
-    public Guid CaregiverId { get; set; }
+    public Guid CaregiverUserId { get; set; }
 
     public Guid CaregiverStatusId { get; set; }
 

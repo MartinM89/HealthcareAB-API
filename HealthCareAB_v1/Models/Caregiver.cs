@@ -6,7 +6,7 @@ public class Caregiver
 {
     [Key]
     public Guid UserId { get; set; }
-
     public User User { get; set; } = null!;
-    // public ICollection<CaregiverDailySchedule> DailySchedules { get; set; } = [];
+
+    public ICollection<CaregiverDailySchedule> DailySchedules { get; set; } = [];
 }
