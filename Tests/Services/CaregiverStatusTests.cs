@@ -18,7 +18,7 @@ public class CaregiverStatusServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ReturnsStatus_WhenFound()
+    public async Task GetByIdAsync_ReturnsStatus_WhenFoundAsync()
     {
         var id = Guid.NewGuid();
         var status = new CaregiverStatus { Id = id, Status = "AVAILABLE" };
@@ -33,13 +33,13 @@ public class CaregiverStatusServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ThrowsValidation_ForEmptyGuid()
+    public async Task GetByIdAsync_ThrowsValidation_ForEmptyGuidAsync()
     {
         await Assert.ThrowsAsync<ValidationException>(() => _service.GetByIdAsync(Guid.Empty));
     }
 
     [Fact]
-    public async Task GetByIdAsync_ThrowsNotFound_WhenNotFound()
+    public async Task GetByIdAsync_ThrowsNotFound_WhenNotFoundAsync()
     {
         var id = Guid.NewGuid();
         _statusRepoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((CaregiverStatus?)null);
