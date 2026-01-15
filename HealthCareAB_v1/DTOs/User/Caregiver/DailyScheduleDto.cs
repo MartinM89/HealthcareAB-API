@@ -8,7 +8,7 @@ public class DailyScheduleDto
     public DateOnly Date { get; set; }
     public string Status { get; set; } = string.Empty;
 
-    public List<BookingDto> Bookings { get; set; } = [];
+    public List<BookingsForScheduleDto> Bookings { get; set; } = [];
 
     public int TotalBookings => Bookings.Count;
 }
