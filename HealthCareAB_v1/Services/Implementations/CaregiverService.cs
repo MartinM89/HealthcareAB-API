@@ -65,16 +65,13 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
     }
 
     public async Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
-        CaregiverSchedulesDto caregiverSchedulesDto
+        Guid caregiverId,
+        int daysAhead = 30
     )
     {
         var startDate = DateTime.UtcNow.Date;
-        var endDate = DateTime.UtcNow.Date.AddDays(caregiverSchedulesDto.DaysAhead);
+        var endDate = DateTime.UtcNow.Date.AddDays(daysAhead);
 
-        return await GetScheduleOverviewAsync(
-            caregiverSchedulesDto.CaregiverId,
-            startDate,
-            endDate
-        );
+        return await GetScheduleOverviewAsync(caregiverId, startDate, endDate);
     }
 }

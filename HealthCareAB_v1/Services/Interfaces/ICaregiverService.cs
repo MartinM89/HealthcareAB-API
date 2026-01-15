@@ -10,6 +10,7 @@ public interface ICaregiverService
         DateTime endDate
     );
     Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
-        CaregiverSchedulesDto caregiverSchedulesDto
+        Guid caregiverId,
+        int daysAhead = 30
     );
 }
