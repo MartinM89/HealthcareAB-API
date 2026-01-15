@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using HealthCareAB_v1.Constants;
-using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -51,6 +50,10 @@ public class AuthController(IAuthService authService) : ControllerBase
     public async Task<IActionResult> RegisterCaregiver([FromBody] RegisterCaregiverDto request)
     {
         var result = await _authService.RegisterCaregiverAsync(request);
+        if (!result.Success)
+        {
+            return Conflict(new { message = result.Message });
+        }
 
         return CreatedAtAction(
             nameof(CheckAuthentication),
