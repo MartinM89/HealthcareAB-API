@@ -18,8 +18,14 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
         return User?.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 
-    [HttpGet("GetUpcomingSchedule")]
-    public async Task<IActionResult> GetUpcomingScheduleAsync()
+    [HttpPost("create-booking")]
+    public async Task<IActionResult> CreateBooking()
+    {
+        return Ok();
+    }
+
+    [HttpGet("get-upcoming-schedule")]
+    public async Task<IActionResult> GetUpcomingSchedule()
     {
         var caregiverId = GetUserId();
 
