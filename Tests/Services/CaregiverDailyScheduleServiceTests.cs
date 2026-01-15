@@ -100,10 +100,6 @@ public class CaregiverDailyScheduleServiceTests
             .Setup(u => u.GetCaregiverByIdAsync(caregiverId))
             .ReturnsAsync((Caregiver?)null);
 
-        _statusRepoMock
-            .Setup(s => s.GetByIdAsync(statusId))
-            .ReturnsAsync(new CaregiverStatus { Id = statusId });
-
         // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() => _service.CreateAsync(dto));
     }
@@ -118,20 +114,18 @@ public class CaregiverDailyScheduleServiceTests
 
         var dto = new CreateCaregiverDailyScheduleDto(date, caregiverId, statusId);
 
-        _userServiceMock
-            .Setup(u => u.GetCaregiverByIdAsync(caregiverId))
-            .ReturnsAsync(
-                new Caregiver
-                {
-                    UserId = caregiverId,
-                    User = new User
-                    {
-                        Id = Guid.NewGuid(),
-                        Username = "u",
-                        PasswordHash = "h",
-                    },
-                }
-            );
+        var caregiver = new Caregiver
+        {
+            UserId = caregiverId,
+            User = new User
+            {
+                Id = Guid.NewGuid(),
+                Username = "u",
+                PasswordHash = "h",
+            },
+        };
+
+        _userServiceMock.Setup(u => u.GetCaregiverByIdAsync(caregiverId)).ReturnsAsync(caregiver);
 
         _statusRepoMock.Setup(s => s.GetByIdAsync(statusId)).ReturnsAsync((CaregiverStatus?)null);
 
