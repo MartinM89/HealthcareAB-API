@@ -1,4 +1,4 @@
-using HealthCareAB_v1.DTOs.Booking.CaregiverScheduleDtos;
+using HealthCareAB_v1.DTOs.User.Caregiver;
 
 namespace HealthCareAB_v1.Services.Interfaces;
 
@@ -10,7 +10,6 @@ public interface ICaregiverService
         DateTime endDate
     );
     Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
-        Guid caregiverId,
-        int daysAhead = 30
+        CaregiverSchedulesDto caregiverSchedulesDto
     );
 }

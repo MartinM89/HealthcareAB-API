@@ -21,15 +21,15 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
     )
     {
         var caregiversSchedule = await _context
-            .CaregiverDailySchedules.Where(schedule => schedule.CaregiverUserId == caregiverId)
-            .Where(schedule => schedule.Start <= endDate && schedule.End >= startDate)
+            .CaregiverDailySchedules.Where(schedule => schedule.CaregiverId == caregiverId)
+            .Where(schedule => schedule.StartTime <= endDate && schedule.EndTime >= startDate)
             .Include(schedule => schedule.CaregiverStatus)
             .Include(schedule => schedule.Bookings)
-                .ThenInclude(booking => booking.Patient)
-                    .ThenInclude(patient => patient.User)
+            .ThenInclude(booking => booking.Patient)
+            .ThenInclude(patient => patient.User)
             .Include(schedule => schedule.Bookings)
-                .ThenInclude(booking => booking.TimeSlot)
-            .OrderBy(schedule => schedule.Start)
+            .ThenInclude(booking => booking.TimeSlot)
+            .OrderBy(schedule => schedule.StartTime)
             .ToListAsync();
 
         return caregiversSchedule;

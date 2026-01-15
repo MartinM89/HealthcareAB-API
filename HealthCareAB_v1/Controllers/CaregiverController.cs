@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using HealthCareAB_v1.DTOs.User.Caregiver;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,9 +9,10 @@ namespace HealthCareAB_v1.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = Roles.Caregiver)]
 public class CaregiverController(ICaregiverService caregiverService) : ControllerBase
 {
-    private readonly ICaregiverService _caregiverService = caregiverService; //Change to Caregiver service later.
+    private readonly ICaregiverService _caregiverService = caregiverService;
 
     private string? GetUserId()
     {
@@ -18,18 +20,18 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
     }
 
     [HttpGet("GetUpcomingSchedule")]
-    [Authorize(Roles = Roles.Caregiver)]
-    public async Task<IActionResult> GetUpcomingScheduleAsync()
+    public async Task<IActionResult> GetUpcomingScheduleAsync(
+        [FromQuery] CaregiverSchedulesDto request
+    )
     {
         var caregiverId = GetUserId();
+
         if (caregiverId == null)
         {
             return Unauthorized();
         }
 
-        var upcomingScheduleOverview = await _caregiverService.GetUpcomingSchedulesAsync(
-            Guid.Parse(caregiverId)
-        );
+        var upcomingScheduleOverview = await _caregiverService.GetUpcomingSchedulesAsync(request);
 
         return Ok(upcomingScheduleOverview);
     }

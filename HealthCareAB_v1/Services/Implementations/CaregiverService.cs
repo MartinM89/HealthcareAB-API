@@ -1,4 +1,4 @@
-using HealthCareAB_v1.DTOs.Booking.CaregiverScheduleDtos;
+using HealthCareAB_v1.DTOs.User.Caregiver;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 
@@ -30,14 +30,14 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
                 .. schedules.Select(schedule => new DailyScheduleDto
                 {
                     Id = schedule.Id,
-                    Start = schedule.Start,
-                    End = schedule.End,
-                    Date = DateOnly.FromDateTime(schedule.Start),
+                    Start = schedule.StartTime,
+                    End = schedule.EndTime,
+                    Date = DateOnly.FromDateTime(schedule.StartTime),
                     Status = schedule.CaregiverStatus.Status,
-                    Bookings = //I WANT THIS SYNTAX. .ToList();
+                    Bookings =
                     [
                         .. schedule
-                            .Bookings.Select(booking => new BookingDto
+                            .Bookings.Select(booking => new BookingsForScheduleDto
                             {
                                 Id = booking.Id,
                                 Comment = booking.Comment,
@@ -65,13 +65,16 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
     }
 
     public async Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
-        Guid caregiverId,
-        int daysAhead = 30
+        CaregiverSchedulesDto caregiverSchedulesDto
     )
     {
         var startDate = DateTime.UtcNow.Date;
-        var endDate = DateTime.UtcNow.Date.AddDays(daysAhead);
+        var endDate = DateTime.UtcNow.Date.AddDays(caregiverSchedulesDto.DaysAhead);
 
-        return await GetScheduleOverviewAsync(caregiverId, startDate, endDate);
+        return await GetScheduleOverviewAsync(
+            caregiverSchedulesDto.CaregiverId,
+            startDate,
+            endDate
+        );
     }
 }
