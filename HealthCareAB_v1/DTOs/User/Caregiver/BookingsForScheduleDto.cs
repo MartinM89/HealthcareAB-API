@@ -1,6 +1,6 @@
 namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
-public class BookingDto
+public class BookingsForScheduleDto
 {
     public Guid Id { get; set; }
     public string Comment { get; set; } = string.Empty;
