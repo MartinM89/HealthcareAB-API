@@ -29,7 +29,7 @@ public class CaregiverDailyScheduleServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ReturnsCreatedSchedule_WhenValid()
+    public async Task CreateAsync_ReturnsCreatedSchedule_WhenValidAsync()
     {
         // Arrange
         var caregiverId = Guid.NewGuid();
@@ -73,7 +73,7 @@ public class CaregiverDailyScheduleServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ThrowsValidationException_WhenDateTooFar()
+    public async Task CreateAsync_ThrowsValidationException_WhenDateTooFarAsync()
     {
         // Arrange
         var dto = new CreateCaregiverDailyScheduleDto(
@@ -87,7 +87,7 @@ public class CaregiverDailyScheduleServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ThrowsNotFoundException_WhenCaregiverNotFound()
+    public async Task CreateAsync_ThrowsNotFoundException_WhenCaregiverNotFoundAsync()
     {
         // Arrange
         var caregiverId = Guid.NewGuid();
@@ -105,7 +105,7 @@ public class CaregiverDailyScheduleServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ThrowsNotFoundException_WhenStatusNotFound()
+    public async Task CreateAsync_ThrowsNotFoundException_WhenStatusNotFoundAsync()
     {
         // Arrange
         var caregiverId = Guid.NewGuid();
