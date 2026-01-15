@@ -3,6 +3,7 @@ using System;
 using HealthCareAB_v1.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HealthCareAB_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113163920_AddedCaregiverIdAndCaregiverStatusId")]
+    partial class AddedCaregiverIdAndCaregiverStatusId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +31,7 @@ namespace HealthCareAB_v1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CaregiverDailyScheduleId")
+                    b.Property<Guid?>("CaregiverDailyScheduleId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
@@ -41,7 +44,7 @@ namespace HealthCareAB_v1.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<Guid>("PatientId")
+                    b.Property<Guid>("PatientUserId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TimeSlotId")
@@ -51,7 +54,7 @@ namespace HealthCareAB_v1.Migrations
 
                     b.HasIndex("CaregiverDailyScheduleId");
 
-                    b.HasIndex("PatientId");
+                    b.HasIndex("PatientUserId");
 
                     b.HasIndex("TimeSlotId");
 
@@ -212,15 +215,13 @@ namespace HealthCareAB_v1.Migrations
 
             modelBuilder.Entity("HealthCareAB_v1.Models.Booking", b =>
                 {
-                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", "CaregiverDailySchedule")
+                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", null)
                         .WithMany("Bookings")
-                        .HasForeignKey("CaregiverDailyScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CaregiverDailyScheduleId");
 
                     b.HasOne("HealthCareAB_v1.Models.Patient", "Patient")
                         .WithMany("Bookings")
-                        .HasForeignKey("PatientId")
+                        .HasForeignKey("PatientUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -229,8 +230,6 @@ namespace HealthCareAB_v1.Migrations
                         .HasForeignKey("TimeSlotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("CaregiverDailySchedule");
 
                     b.Navigation("Patient");
 
@@ -256,9 +255,6 @@ namespace HealthCareAB_v1.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
-                        .WithMany("DailySchedules")
-                        .HasForeignKey("CaregiverUserId")
                     b.HasOne("HealthCareAB_v1.Models.CaregiverStatus", "CaregiverStatus")
                         .WithMany("CaregiverDailySchedules")
                         .HasForeignKey("CaregiverStatusId")
@@ -290,11 +286,6 @@ namespace HealthCareAB_v1.Migrations
                         .IsRequired();
 
                     b.Navigation("Patient");
-                });
-
-            modelBuilder.Entity("HealthCareAB_v1.Models.Caregiver", b =>
-                {
-                    b.Navigation("DailySchedules");
                 });
 
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>
