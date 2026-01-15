@@ -258,7 +258,7 @@ namespace HealthCareAB_v1.Migrations
 
                     b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
                         .WithMany("DailySchedules")
-                        .HasForeignKey("CaregiverUserId")
+                        .HasForeignKey("CaregiverUserId");
                     b.HasOne("HealthCareAB_v1.Models.CaregiverStatus", "CaregiverStatus")
                         .WithMany("CaregiverDailySchedules")
                         .HasForeignKey("CaregiverStatusId")
