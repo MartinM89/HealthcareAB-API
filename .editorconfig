@@ -106,6 +106,10 @@ dotnet_diagnostic.CA1001.severity = none
 [Tests/**.cs]
 dotnet_naming_rule.async_methods_must_end_in_async.severity = none
 
+# Disable Async suffix enforcement for controllers
+[**/Controllers/**.cs]
+dotnet_naming_rule.async_methods_must_end_in_async.severity = none
+
 ########################################
 # XML / .csproj files
 ########################################
