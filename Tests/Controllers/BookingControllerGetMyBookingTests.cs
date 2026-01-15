@@ -93,22 +93,21 @@ public class BookingControllerGetMyBookingsTests
     {
         using var db = CreateInMemoryDb();
 
-        var p1Id = Guid.NewGuid();
-        var p2Id = Guid.NewGuid();
+        var patient1Id = Guid.NewGuid();
+        var patient2Id = Guid.NewGuid();
 
-        var (u1, p1) = CreatePatient(p1Id, "p1");
-        var (u2, p2) = CreatePatient(p2Id, "p2");
+        var (user1, patient1) = CreatePatient(patient1Id, "p1");
+        var (user2, patient2) = CreatePatient(patient2Id, "p2");
 
-        db.Users.AddRange(u1, u2);
-        db.Patients.AddRange(p1, p2);
+        db.Users.AddRange(user1, user2);
+        db.Patients.AddRange(patient1, patient2);
 
-        // Booking för patient 1
         db.Bookings.Add(new Booking
         {
             Id = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
-            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), // framtid
-            Patient = p1,
+            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            Patient = patient1,
             TimeSlot = new TimeSlot
             {
                 Id = Guid.NewGuid(),
@@ -117,13 +116,12 @@ public class BookingControllerGetMyBookingsTests
             }
         });
 
-        // Booking för patient 2
         db.Bookings.Add(new Booking
         {
             Id = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
-            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), // framtid
-            Patient = p2,
+            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            Patient = patient2,
             TimeSlot = new TimeSlot
             {
                 Id = Guid.NewGuid(),
@@ -134,7 +132,7 @@ public class BookingControllerGetMyBookingsTests
 
         await db.SaveChangesAsync();
 
-        var controller = CreateController(db, p1Id);
+        var controller = CreateController(db, patient1Id);
 
         var action = await controller.GetMyBookingsAsync(CancellationToken.None);
 
@@ -151,9 +149,9 @@ public class BookingControllerGetMyBookingsTests
         using var db = CreateInMemoryDb();
 
         var patientId = Guid.NewGuid();
-        var (u, p) = CreatePatient(patientId, "p");
-        db.Users.Add(u);
-        db.Patients.Add(p);
+        var (user, patient) = CreatePatient(patientId, "p");
+        db.Users.Add(user);
+        db.Patients.Add(patient);
         await db.SaveChangesAsync();
 
         var controller = CreateController(db, patientId);
