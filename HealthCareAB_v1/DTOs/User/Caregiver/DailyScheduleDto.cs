@@ -1,4 +1,4 @@
-namespace HealthCareAB_v1.DTOs.Booking.CaregiverScheduleDtos;
+namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
 public class DailyScheduleDto
 {
