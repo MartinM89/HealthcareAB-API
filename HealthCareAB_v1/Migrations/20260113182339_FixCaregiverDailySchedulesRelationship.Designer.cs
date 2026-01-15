@@ -3,6 +3,7 @@ using System;
 using HealthCareAB_v1.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HealthCareAB_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260113182339_FixCaregiverDailySchedulesRelationship")]
+    partial class FixCaregiverDailySchedulesRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,23 +77,23 @@ namespace HealthCareAB_v1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CaregiverId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("CaregiverStatusId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<Guid>("CaregiverUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("End")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("Start")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CaregiverId");
-
                     b.HasIndex("CaregiverStatusId");
+
+                    b.HasIndex("CaregiverUserId");
 
                     b.ToTable("CaregiverDailySchedules");
                 });
@@ -250,18 +253,15 @@ namespace HealthCareAB_v1.Migrations
 
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>
                 {
-                    b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
-                        .WithMany()
-                        .HasForeignKey("CaregiverId")
+                    b.HasOne("HealthCareAB_v1.Models.CaregiverStatus", "CaregiverStatus")
+                        .WithMany("CaregiverDailySchedules")
+                        .HasForeignKey("CaregiverStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
                         .WithMany("DailySchedules")
-                        .HasForeignKey("CaregiverUserId");
-                    b.HasOne("HealthCareAB_v1.Models.CaregiverStatus", "CaregiverStatus")
-                        .WithMany("CaregiverDailySchedules")
-                        .HasForeignKey("CaregiverStatusId")
+                        .HasForeignKey("CaregiverUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
