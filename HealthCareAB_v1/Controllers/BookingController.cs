@@ -51,9 +51,9 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
         return result switch
         {
-            CancelBookingResult.Success => NoContent(),
-            CancelBookingResult.NotFound => NotFound(),
-            CancelBookingResult.Forbidden => Forbid(),
+            CancelBookingResult.Cancelled => NoContent(),
+            CancelBookingResult.BookingDoesNotExist => NotFound(),
+            CancelBookingResult.NotOwnedByPatient => Forbid(),
             CancelBookingResult.Unauthorized => Unauthorized(),
             _ => Unauthorized(),
         };

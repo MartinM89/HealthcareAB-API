@@ -56,16 +56,16 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
         if (booking == null)
         {
-            return CancelBookingResult.NotFound;
+            return CancelBookingResult.BookingDoesNotExist;
         }
 
         if (booking.Patient == null || booking.Patient.UserId != patientId)
         {
-            return CancelBookingResult.Forbidden;
+            return CancelBookingResult.NotOwnedByPatient;
         }
 
         await _bookingRepository.DeleteAsync(booking, ct);
-        return CancelBookingResult.Success;
+        return CancelBookingResult.Cancelled;
     }
 
     private static TimeOnly SetEnd(TimeOnly start, double timeLength)
