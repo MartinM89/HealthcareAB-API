@@ -28,7 +28,7 @@ public class BookingServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithExistingPatient_CreatesBookingAndSaves()
+    public async Task CreateAsync_WithExistingPatient_CreatesBookingAndSavesAsync()
     {
         // Arrange (use shared fixtures)
         var patientId = Guid.NewGuid();
@@ -77,7 +77,7 @@ public class BookingServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithMissingPatient_ThrowsNotFoundExceptionAndDoesNotCallRepo()
+    public async Task CreateAsync_WithMissingPatient_ThrowsNotFoundExceptionAndDoesNotCallRepoAsync()
     {
         // Arrange:
         _bookingRepositoryMock.Reset();

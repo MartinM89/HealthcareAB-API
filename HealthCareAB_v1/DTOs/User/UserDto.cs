@@ -1,4 +1,4 @@
-﻿namespace HealthCareAB_v1.DTOs;
+﻿namespace HealthCareAB_v1.DTOs.User;
 
 public class UserDto
 {

@@ -20,7 +20,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
+    public async Task<IActionResult> CreateBookingAsync([FromBody] CreateBookingDto dto)
     {
         var userId = GetUserId();
         if (userId == null)
@@ -40,7 +40,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpDelete("{bookingId:guid}")]
-    public async Task<IActionResult> CancelBooking(Guid bookingId, CancellationToken ct)
+    public async Task<IActionResult> CancelBookingAsync(Guid bookingId, CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
         {
@@ -51,9 +51,9 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
         return result switch
         {
-            CancelBookingResult.Success => NoContent(),
-            CancelBookingResult.NotFound => NotFound(),
-            CancelBookingResult.Forbidden => Forbid(),
+            CancelBookingResult.Cancelled => NoContent(),
+            CancelBookingResult.BookingDoesNotExist => NotFound(),
+            CancelBookingResult.NotOwnedByPatient => Forbid(),
             CancelBookingResult.Unauthorized => Unauthorized(),
             _ => Unauthorized(),
         };
@@ -67,7 +67,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpGet("mybookings")]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetMyBookings(CancellationToken ct)
+    public async Task<ActionResult<List<BookingResponseDto>>> GetMyBookingsAsync(CancellationToken ct)
     {
         if(!TryGetUserId(out var patientId))
         {
