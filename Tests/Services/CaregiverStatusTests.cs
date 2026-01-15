@@ -14,7 +14,6 @@ public class CaregiverStatusServiceTests
     public CaregiverStatusServiceTests()
     {
         _statusRepoMock = new Mock<ICaregiverStatusRepository>();
-
         _service = new CaregiverStatusService(_statusRepoMock.Object);
     }
 
@@ -34,9 +33,9 @@ public class CaregiverStatusServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_ThrowsNotFound_ForEmptyGuid()
+    public async Task GetByIdAsync_ThrowsValidation_ForEmptyGuid()
     {
-        await Assert.ThrowsAsync<NotFoundException>(() => _service.GetByIdAsync(Guid.Empty));
+        await Assert.ThrowsAsync<ValidationException>(() => _service.GetByIdAsync(Guid.Empty));
     }
 
     [Fact]
