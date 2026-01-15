@@ -15,7 +15,7 @@ public class CaregiverStatusService(ICaregiverStatusRepository caregiverStatusRe
     {
         if (statusId == Guid.Empty)
         {
-            throw new NotFoundException("Status ID cannot be empty.");
+            throw new ValidationException("Status ID cannot be empty.");
         }
 
         var status =
