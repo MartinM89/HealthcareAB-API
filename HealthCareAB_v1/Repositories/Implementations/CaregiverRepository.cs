@@ -1,3 +1,4 @@
+using HealthCareAB_v1.DTOs.User.Caregiver;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -33,5 +34,31 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
             .ToListAsync();
 
         return caregiversSchedule;
+    }
+
+    public async Task<Patient?> GetPatientByIdAsync(CaregiverCreateBookingDto request)
+    {
+        return await _context.Patients.FirstOrDefaultAsync(p => p.UserId == request.PatientId);
+    }
+
+    public async Task<CaregiverDailySchedule?> GetCaregiversDailyScheduleAsync(
+        CaregiverCreateBookingDto request
+    )
+    {
+        return await _context
+            .CaregiverDailySchedules.Include(s => s.CaregiverStatus)
+            .Include(s => s.Bookings)
+            .FirstOrDefaultAsync(s => s.Id == request.CaregiverDailyScheduleId);
+    }
+
+    public async Task<TimeSlot?> GetTimeSlotAsync(CaregiverCreateBookingDto request)
+    {
+        return await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == request.TimeSlotId);
+    }
+
+    public async Task AddBookingAsync(Booking booking)
+    {
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
     }
 }

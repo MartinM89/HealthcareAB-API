@@ -1,4 +1,6 @@
 using HealthCareAB_v1.DTOs.User.Caregiver;
+using HealthCareAB_v1.Exceptions;
+using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 
@@ -73,5 +75,75 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
         var endDate = DateTime.UtcNow.Date.AddDays(daysAhead);
 
         return await GetScheduleOverviewAsync(caregiverId, startDate, endDate);
+    }
+
+    public async Task<Booking> CreateBookingForPatientAsync(
+        Guid caregiverId,
+        CaregiverCreateBookingDto request
+    )
+    {
+        var patient =
+            _caregiverRepository.GetPatientByIdAsync(request)
+            ?? throw new NotFoundException($"Patient with ID {request.PatientId} not found");
+
+        var dailySchedule =
+            await _caregiverRepository.GetCaregiversDailyScheduleAsync(request)
+            ?? throw new NotFoundException(
+                $"Schedule with ID {request.CaregiverDailyScheduleId} not found"
+            );
+
+        if (dailySchedule.CaregiverId != caregiverId)
+        {
+            throw new UnauthorizedAccessException(
+                "You can only create bookings on your own schedules"
+            );
+        }
+
+        if (dailySchedule.CaregiverStatus.Status != CaregiverStatuses.Available)
+        {
+            throw new InvalidOperationException(
+                $"Cannot create booking - schedule status is {dailySchedule.CaregiverStatus.Status}"
+            );
+        }
+
+        var timeSlot =
+            await _caregiverRepository.GetTimeSlotAsync(request)
+            ?? throw new NotFoundException($"Time slot with ID {request.TimeSlotId} not found");
+
+        var slotDateTime = request.Date.ToDateTime(timeSlot.Start).ToUniversalTime();
+
+        if (slotDateTime < dailySchedule.StartTime || slotDateTime >= dailySchedule.EndTime)
+        {
+            throw new InvalidOperationException(
+                $"Time slot {timeSlot.Start}-{timeSlot.End} is outside schedule working hours "
+                    + $"({dailySchedule.StartTime:HH:mm}-{dailySchedule.EndTime:HH:mm} UTC)"
+            );
+        }
+
+        var isSlotBooked = dailySchedule.Bookings.Any(b =>
+            b.TimeSlotId == request.TimeSlotId && b.Date == request.Date
+        );
+
+        if (isSlotBooked)
+        {
+            throw new InvalidOperationException(
+                $"Time slot {timeSlot.Start}-{timeSlot.End} is already booked on {request.Date}"
+            );
+        }
+
+        var booking = new Booking
+        {
+            Id = Guid.NewGuid(),
+            Comment = request.Comment,
+            Date = request.Date,
+            PatientId = request.PatientId,
+            TimeSlotId = request.TimeSlotId,
+            CaregiverDailyScheduleId = request.CaregiverDailyScheduleId,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        await _caregiverRepository.AddBookingAsync(booking);
+
+        return booking;
     }
 }
