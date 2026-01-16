@@ -1,4 +1,5 @@
 using HealthCareAB_v1.DTOs.User.Caregiver;
+using HealthCareAB_v1.Models;
 
 namespace HealthCareAB_v1.Services.Interfaces;
 
@@ -13,4 +14,6 @@ public interface ICaregiverService
         Guid caregiverId,
         int daysAhead = 30
     );
+
+    Task<Booking> CreateBookingForPatientAsync(Guid caregiverId, CaregiverCreateBookingDto request);
 }
