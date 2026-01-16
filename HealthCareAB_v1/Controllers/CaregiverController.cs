@@ -29,7 +29,7 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
 
             if (caregiverId == null)
             {
-                return Unauthorized(new { message = "You must be logged in as a caregiver" });
+                return Unauthorized("You must be logged in as a caregiver");
             }
 
             var booking = await _caregiverService.CreateBookingForPatientAsync(
