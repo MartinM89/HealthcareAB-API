@@ -56,16 +56,16 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
         if (booking == null)
         {
-            return CancelBookingResult.NotFound;
+            return CancelBookingResult.BookingDoesNotExist;
         }
 
         if (booking.Patient == null || booking.Patient.UserId != patientId)
         {
-            return CancelBookingResult.Forbidden;
+            return CancelBookingResult.NotOwnedByPatient;
         }
 
         await _bookingRepository.DeleteAsync(booking, ct);
-        return CancelBookingResult.Success;
+        return CancelBookingResult.Cancelled;
     }
 
     private static TimeOnly SetEnd(TimeOnly start, double timeLength)
@@ -78,14 +78,34 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
     {
         var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
 
-        return [.. bookings.Select(b => new BookingResponseDto
+        var now = DateTime.UtcNow;
+
+        bool IsPast(Booking b)
         {
-            Id = b.Id,
-            Comment = b.Comment,
-            CreatedAt = b.CreatedAt,
-            Date = b.Date,
-            Start = b.TimeSlot.Start,
-            End = b.TimeSlot.End,
-        })];
+            var end = b.Date.ToDateTime(b.TimeSlot.End);
+            return end < now;
+        }
+
+        var upcoming = bookings
+            .Where(b => !IsPast(b))
+            .OrderBy(b => b.Date)
+            .ThenBy(b => b.TimeSlot.Start);
+
+        var past = bookings
+            .Where(IsPast)
+            .OrderByDescending(b => b.Date)
+            .ThenByDescending(b => b.TimeSlot.Start);
+
+        return [.. upcoming
+            .Concat(past)
+            .Select(b => new BookingResponseDto
+            {
+                Id = b.Id,
+                Comment = b.Comment,
+                CreatedAt = b.CreatedAt,
+                Date = b.Date,
+                Start = b.TimeSlot.Start,
+                End = b.TimeSlot.End,
+            })];
     }
 }

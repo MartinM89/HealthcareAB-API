@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using HealthCareAB_v1.Constants;
-using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +21,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register-patient")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RegisterPatient([FromBody] RegisterPatientDto request)
+    public async Task<IActionResult> RegisterPatientAsync([FromBody] RegisterPatientDto request)
     {
         var result = await _authService.RegisterPatientAsync(request);
 
@@ -48,9 +47,13 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register-caregiver")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RegisterCaregiver([FromBody] RegisterCaregiverDto request)
+    public async Task<IActionResult> RegisterCaregiverAsync([FromBody] RegisterCaregiverDto request)
     {
         var result = await _authService.RegisterCaregiverAsync(request);
+        if (!result.Success)
+        {
+            return Conflict(new { message = result.Message });
+        }
 
         return CreatedAtAction(
             nameof(CheckAuthentication),
@@ -69,7 +72,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginDto request)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginDto request)
     {
         var (result, token) = await _authService.LoginAsync(request);
 

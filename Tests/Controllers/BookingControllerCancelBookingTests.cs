@@ -48,7 +48,7 @@ public class BookingControllerCancelBookingTests
     }
 
     [Fact]
-    public async Task CancelBooking_OwnBooking_ReturnsNoContent_AndDeletesBooking()
+    public async Task CancelBooking_OwnBooking_ReturnsNoContent_AndDeletesBookingAsync()
     {
         using var db = CreateInMemoryDb();
 
@@ -77,14 +77,14 @@ public class BookingControllerCancelBookingTests
 
         var controller = CreateController(db, userId);
 
-        var result = await controller.CancelBooking(bookingId, CancellationToken.None);
+        var result = await controller.CancelBookingAsync(bookingId, CancellationToken.None);
 
         Assert.IsType<NoContentResult>(result);
         Assert.False(await db.Bookings.AnyAsync(b => b.Id == bookingId));
     }
 
     [Fact]
-    public async Task CancelBooking_NotOwner_ReturnsForbidden_AndDoesNotDelete()
+    public async Task CancelBooking_NotOwner_ReturnsForbidden_AndDoesNotDeleteAsync()
     {
         using var db = CreateInMemoryDb();
 
@@ -115,14 +115,14 @@ public class BookingControllerCancelBookingTests
 
         var controller = CreateController(db, otherPatientsId);
 
-        var result = await controller.CancelBooking(bookingId, CancellationToken.None);
+        var result = await controller.CancelBookingAsync(bookingId, CancellationToken.None);
 
         Assert.IsType<ForbidResult>(result);
         Assert.True(await db.Bookings.AnyAsync(b => b.Id == bookingId));
     }
 
     [Fact]
-    public async Task CancelBooking_BookingNotFound_ReturnsNotFound()
+    public async Task CancelBooking_BookingNotFound_ReturnsNotFoundAsync()
     {
         using var db = CreateInMemoryDb();
 
@@ -131,7 +131,7 @@ public class BookingControllerCancelBookingTests
 
         var controller = CreateController(db, patientId);
 
-        var result = await controller.CancelBooking(missingBookingId, CancellationToken.None);
+        var result = await controller.CancelBookingAsync(missingBookingId, CancellationToken.None);
 
         Assert.IsType<NotFoundResult>(result);
     }

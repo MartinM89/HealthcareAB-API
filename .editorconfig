@@ -70,6 +70,27 @@ dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
 dotnet_naming_style.prefix_i_style.required_prefix = I
 dotnet_naming_style.prefix_i_style.capitalization = pascal_case
 
+# Methods must be PascalCase
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_symbols.methods.applicable_kinds = method
+dotnet_naming_symbols.methods.applicable_accessibilities = *
+
+dotnet_naming_rule.methods_must_be_pascal_case.symbols = methods
+dotnet_naming_rule.methods_must_be_pascal_case.style = pascal_case
+dotnet_naming_rule.methods_must_be_pascal_case.severity = warning
+
+# Async suffix for async methods
+dotnet_naming_style.async_suffix.required_suffix = Async
+dotnet_naming_style.async_suffix.capitalization = pascal_case
+
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+
+dotnet_naming_rule.async_methods_must_end_in_async.symbols = async_methods
+dotnet_naming_rule.async_methods_must_end_in_async.style = async_suffix
+dotnet_naming_rule.async_methods_must_end_in_async.severity = warning
+
 ########################################
 # Analyzer defaults
 ########################################
@@ -77,9 +98,17 @@ dotnet_naming_style.prefix_i_style.capitalization = pascal_case
 dotnet_analyzer_diagnostic.severity = warning
 dotnet_diagnostic.IDE0058.severity = none # Ignore unused expression value for service registrations
 dotnet_diagnostic.IDE0055.severity = none
+dotnet_diagnostic.IDE0305.severity = none # Ignore Collection initialization can be simplified
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1001.severity = none
 
+# Disable Async suffix enforcement for tests
+[Tests/**.cs]
+dotnet_naming_rule.async_methods_must_end_in_async.severity = none
+
+# Disable Async suffix enforcement for controllers
+[**/Controllers/**.cs]
+dotnet_naming_rule.async_methods_must_end_in_async.severity = none
 
 ########################################
 # XML / .csproj files
