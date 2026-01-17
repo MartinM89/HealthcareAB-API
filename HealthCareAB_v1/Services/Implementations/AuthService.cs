@@ -1,6 +1,5 @@
 ﻿using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.DTOs.Auth;
-using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.Extensions.Options;
@@ -15,7 +14,6 @@ public class AuthService(
     IJwtTokenService jwtTokenService,
     IOptions<JwtSettings> jwtSettings,
     IWebHostEnvironment environment
-// IHttpContextAccessor httpContextAccessor
 ) : IAuthService
 {
     private readonly IUserService _userService =
@@ -25,9 +23,6 @@ public class AuthService(
     private readonly JwtSettings _jwtSettings =
         jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
     private readonly bool _isDevelopment = environment?.IsDevelopment() ?? false;
-
-    // private readonly IHttpContextAccessor _httpContextAccessor =
-    //     httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     /// <inheritdoc />
     public async Task<AuthResponseDto> RegisterPatientAsync(RegisterPatientDto registerDto)
@@ -39,17 +34,11 @@ public class AuthService(
             return new AuthResponseDto { Success = false, Message = "Username is already taken" };
         }
 
-        // Throws an ValidationException if a role that doesn't exist is sent with the dto
-        DetermineValidRoles(registerDto.Roles);
-
-        // Determine roles with security check
-        var roles = DetermineUserRoles(registerDto.Roles);
-
         var user = new User
         {
             Username = registerDto.Username,
             PasswordHash = _userService.HashPassword(registerDto.Password),
-            Roles = roles,
+            Roles = [Roles.Patient],
             Patient = new Patient { },
         };
 
@@ -91,38 +80,6 @@ public class AuthService(
             Username = user.Username,
             Roles = user.Roles,
         };
-    }
-
-    /// <summary>
-    /// Detemines if the roles for a new user are valid.
-    /// </summary>
-    private static void DetermineValidRoles(List<string> roles)
-    {
-        var rolesToCheck = roles.Select(Roles.IsValidRole);
-
-        foreach (var isValidRole in rolesToCheck)
-        {
-            if (!isValidRole)
-            {
-                throw new ValidationException("User cannot have that role.");
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines the roles for a new user.
-    /// Default role is set to PATIENT.
-    /// </summary>
-    private static List<string> DetermineUserRoles(List<string> requestedRoles)
-    {
-        // If no roles requested, default to User
-        if (requestedRoles == null || requestedRoles.Count == 0)
-        {
-            return [Roles.Patient];
-        }
-
-        // Return requested roles (original behavior)
-        return requestedRoles;
     }
 
     /// <inheritdoc />
