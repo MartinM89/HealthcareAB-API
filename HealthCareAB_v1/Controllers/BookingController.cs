@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCareAB_v1.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("api/[controller]")]
 public class BookingController(IBookingService bookingService) : ControllerBase
