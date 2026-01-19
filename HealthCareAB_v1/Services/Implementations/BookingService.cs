@@ -2,7 +2,6 @@ using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
-using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using HealthCareAB_v1.Services.Results;
@@ -10,24 +9,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
-public class BookingService(IBookingRepository bookingRepository, AppDbContext appDbContext)
-    : IBookingService
+public class BookingService(
+    IBookingRepository bookingRepository,
+    ITimeSlotService timeSlotService,
+    ICaregiverDailyScheduleService caregiverDailyScheduleService,
+    IUserService userService,
+    IAppDbContext appDbContext
+) : IBookingService
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
     private readonly IBookingRepository _bookingRepository = bookingRepository;
-    private const double durationInMinutes = 30;
+    private readonly ITimeSlotService _timeSlotService = timeSlotService;
+    private readonly ICaregiverDailyScheduleService _caregiverDailyScheduleService =
+        caregiverDailyScheduleService;
+    private readonly IAppDbContext _appDbContext = appDbContext;
+
+    private readonly IUserService _userService = userService;
 
     public async Task<Booking> CreateAsync(string userId, CreateBookingDto dto)
     {
-        var user =
-            await _appDbContext
-                .Users.Include(u => u.Patient)
-                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
-            ?? throw new NotFoundException("Patient not found");
+        var patient =
+            await _userService.GetPatientByIdAsync(Guid.Parse(userId))
+            ?? throw new NotFoundException("Patient not found.");
 
-        if (user.Patient is null)
+        var timeslot = await _timeSlotService.GetByIdAsync(dto.TimeSlotId);
+
+        var schedule = await _caregiverDailyScheduleService.GetByIdAsync(dto.ScheduleId);
+
+        if (schedule.Bookings.ToList().Any(b => b.TimeSlot?.Id == timeslot.Id))
         {
-            throw new NotFoundException("Patient not found");
+            throw new ValidationException("This time is already booked");
         }
 
         var booking = new Booking
@@ -36,13 +46,12 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             Comment = dto.Comment ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
-            TimeSlot = new TimeSlot
-            {
-                Start = dto.Start,
-                End = SetEnd(dto.Start, durationInMinutes),
-            },
-            Patient = user.Patient,
-            CaregiverDailyScheduleId = dto.CaregiverDailyScheduleId
+            CaregiverDailyScheduleId = dto.CaregiverDailyScheduleId,
+
+            TimeSlot = timeslot,
+            Patient = patient,
+            DailySchedule = schedule,
+
         };
 
         return await _bookingRepository.CreateAsync(booking);
@@ -68,12 +77,6 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
 
         await _bookingRepository.DeleteAsync(booking, ct);
         return CancelBookingResult.Cancelled;
-    }
-
-    private static TimeOnly SetEnd(TimeOnly start, double timeLength)
-    {
-        var finalTime = timeLength;
-        return start.AddMinutes(finalTime);
     }
 
     public async Task<List<BookingResponseDto>> GetByPatientIdAsync(

@@ -26,7 +26,30 @@ public class BookingControllerGetMyBookingsTests
     private static BookingController CreateBookingController(AppDbContext db, Guid? userId = null)
     {
         IBookingRepository bookingRepository = new BookingRepository(db);
-        IBookingService bookingService = new BookingService(bookingRepository, db);
+
+        var timeSlotRepository = new TimeSlotRepository(db);
+
+        ITimeSlotService timeSlotService = new TimeSlotService(timeSlotRepository);
+
+        IUserService userService = new UserService(db);
+
+        var caregiverStatusRepository = new CaregiverStatusRepository(db);
+
+        var caregiverDailyScheduleRepository = new CaregiverDailyScheduleRepository(db);
+
+        ICaregiverDailyScheduleService caregiverDailyScheduleService =
+            new CaregiverDailyScheduleService(
+                caregiverStatusRepository,
+                userService,
+                caregiverDailyScheduleRepository
+            );
+
+        IBookingService bookingService = new BookingService(
+            bookingRepository,
+            timeSlotService,
+            caregiverDailyScheduleService,
+            userService
+        );
 
         var controller = new BookingController(bookingService);
 

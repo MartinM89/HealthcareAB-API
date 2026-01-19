@@ -33,12 +33,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
         var result = await _bookingService.CreateAsync(userId, dto);
 
-        // tillgänglig vårdgivare behövs
-        if (result == null)
-        {
-            return BadRequest();
-        }
-        return Ok(result);
+        return Ok(MapToDto(result));
     }
 
     [Authorize(Roles = Roles.Patient)]
@@ -86,5 +81,18 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     {
         var result = await _bookingService.GetAvailableTimeSlotsAsync(date, ct);
         return Ok(result);
+    }
+
+    private static BookingResponseDto MapToDto(Booking booking)
+    {
+        return new BookingResponseDto
+        {
+            Id = booking.Id,
+            Comment = booking.Comment,
+            CreatedAt = booking.CreatedAt,
+            Date = booking.Date,
+            Start = booking.TimeSlot.Start,
+            End = booking.TimeSlot.End,
+        };
     }
 }
