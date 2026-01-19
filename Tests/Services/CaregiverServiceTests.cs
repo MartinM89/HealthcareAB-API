@@ -16,7 +16,7 @@ public class CaregiverServiceTests
         _caregiverService = new CaregiverService(_caregiverRepoMock.Object);
     }
 
-    #region GetScheduleOverviewAsync service method
+    #region
     [Fact]
     public async Task GetScheduleOverviewAsync_WhenNoSchedulesExists_ReturnsEmptySchedules()
     {
@@ -293,6 +293,5 @@ public class CaregiverServiceTests
             Times.Never
         );
     }
-}
-
     #endregion GetScheduleOverviewAsync service method
+}
