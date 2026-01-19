@@ -27,6 +27,7 @@ public class RegisterPatientDto
     public List<string> Roles { get; set; } = [];
 }
 
+[ExcludeFromCodeCoverage]
 public class RegisterCaregiverDto
 {
     [Required(ErrorMessage = "Username is required")]
