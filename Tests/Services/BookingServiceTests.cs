@@ -15,6 +15,7 @@ public class BookingServiceTests
     private readonly Mock<ITimeSlotService> _timeSlotServiceMock;
     private readonly Mock<ICaregiverDailyScheduleService> _caregiverDailyScheduleServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<IAppDbContext> _appDbContextMock;
 
     public BookingServiceTests()
     {
@@ -22,12 +23,14 @@ public class BookingServiceTests
         _timeSlotServiceMock = new Mock<ITimeSlotService>();
         _caregiverDailyScheduleServiceMock = new Mock<ICaregiverDailyScheduleService>();
         _userServiceMock = new Mock<IUserService>();
+        _appDbContextMock = new Mock<IAppDbContext>();
 
         _bookingService = new BookingService(
             _bookingRepositoryMock.Object,
             _timeSlotServiceMock.Object,
             _caregiverDailyScheduleServiceMock.Object,
-            _userServiceMock.Object
+            _userServiceMock.Object,
+            _appDbContextMock.Object
         );
     }
 

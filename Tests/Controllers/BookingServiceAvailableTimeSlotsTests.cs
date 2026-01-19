@@ -2,6 +2,7 @@ using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Implementations;
+using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Tests.Controllers;
@@ -19,8 +20,32 @@ public class BookingServiceAvailableTimeSlotsTests
 
     private static BookingService CreateBookingService(AppDbContext db)
     {
-        IBookingRepository repo = new BookingRepository(db);
-        return new BookingService(repo, db);
+        IBookingRepository bookingRepository = new BookingRepository(db);
+
+        ITimeSlotRepository timeSlotRepository = new TimeSlotRepository(db);
+        ITimeSlotService timeSlotService = new TimeSlotService(timeSlotRepository);
+
+        IUserService userService = new UserService(db);
+
+        ICaregiverStatusRepository caregiverStatusRepository = new CaregiverStatusRepository(db);
+
+        ICaregiverDailyScheduleRepository caregiverDailyScheduleRepository =
+        new CaregiverDailyScheduleRepository(db);
+
+        ICaregiverDailyScheduleService caregiverDailyScheduleService =
+            new CaregiverDailyScheduleService(
+                caregiverStatusRepository,
+                userService,
+                caregiverDailyScheduleRepository
+            );
+
+        return new BookingService(
+            bookingRepository,
+            timeSlotService,
+            caregiverDailyScheduleService,
+            userService,
+            db
+        );
     }
 
     private static CaregiverStatus AvailableStatus() =>
