@@ -16,6 +16,7 @@ public class CaregiverServiceTests
         _caregiverService = new CaregiverService(_caregiverRepoMock.Object);
     }
 
+    #region GetScheduleOverviewAsync service method
     [Fact]
     public async Task GetScheduleOverviewAsync_WhenNoSchedulesExists_ReturnsEmptySchedules()
     {
@@ -221,8 +222,9 @@ public class CaregiverServiceTests
         var endDate = startDate.AddDays(7);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            async () =>
+                await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
         );
 
         Assert.Equal("Caregiver ID cannot be empty", exception.Message);
@@ -247,8 +249,9 @@ public class CaregiverServiceTests
         var endDate = DateTime.UtcNow.Date.AddDays(-7);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            async () =>
+                await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
         );
 
         Assert.Equal("End date cannot be before start date", exception.Message);
@@ -273,8 +276,9 @@ public class CaregiverServiceTests
         var endDate = DateTime.UtcNow.Date.AddDays(31);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            async () =>
+                await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
         );
 
         Assert.Equal("Date range cannot exceed 30 days", exception.Message);
@@ -290,3 +294,5 @@ public class CaregiverServiceTests
         );
     }
 }
+
+    #endregion GetScheduleOverviewAsync service method
