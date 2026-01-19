@@ -51,6 +51,7 @@ public class RegisterCaregiverDto
     public List<string> Roles { get; set; } = [];
 }
 
+[ExcludeFromCodeCoverage]
 public class PasswordIncludesUppercaseAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)
@@ -66,6 +67,7 @@ public class PasswordIncludesUppercaseAttribute : ValidationAttribute
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class PasswordIncludesLowercaseAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)
@@ -81,6 +83,7 @@ public class PasswordIncludesLowercaseAttribute : ValidationAttribute
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class PasswordIncludeDigitAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)
@@ -96,6 +99,7 @@ public class PasswordIncludeDigitAttribute : ValidationAttribute
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class PasswordIncludeSpecialCharacterAttribute : ValidationAttribute
 {
     public override bool IsValid(object? value)

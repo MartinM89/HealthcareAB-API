@@ -22,5 +22,7 @@ public class Booking
 
     [JsonIgnore]
     public Patient Patient { get; set; } = null!;
+
+    [JsonIgnore]
     public CaregiverDailySchedule DailySchedule { get; set; } = null!;
 }

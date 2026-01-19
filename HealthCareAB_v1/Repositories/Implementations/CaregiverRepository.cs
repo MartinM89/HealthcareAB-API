@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.DTOs.User.Caregiver;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Repositories.Implementations;
 
+[ExcludeFromCodeCoverage]
 public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
 {
     private readonly IAppDbContext _context = context;

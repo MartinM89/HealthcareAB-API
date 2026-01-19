@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
+[ExcludeFromCodeCoverage]
 public class DailyScheduleDto
 {
     public Guid Id { get; set; }
