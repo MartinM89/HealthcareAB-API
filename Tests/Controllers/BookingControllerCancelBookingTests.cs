@@ -22,7 +22,7 @@ public class BookingControllerCancelBookingTests
         return new AppDbContext(options);
     }
 
-    private static BookingController CreateController(AppDbContext db, Guid? userId = null)
+    private static BookingController CreateBookingController(AppDbContext db, Guid? userId = null)
     {
         IBookingRepository bookingRepository = new BookingRepository(db);
         IBookingService bookingService = new BookingService(bookingRepository, db);
@@ -75,9 +75,9 @@ public class BookingControllerCancelBookingTests
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
 
-        var controller = CreateController(db, userId);
+        var controller = CreateBookingController(db, userId);
 
-        var result = await controller.CancelBookingAsync(bookingId, CancellationToken.None);
+        var result = await controller.Cancel(bookingId, CancellationToken.None);
 
         Assert.IsType<NoContentResult>(result);
         Assert.False(await db.Bookings.AnyAsync(b => b.Id == bookingId));
@@ -113,9 +113,9 @@ public class BookingControllerCancelBookingTests
         db.Bookings.Add(booking);
         await db.SaveChangesAsync();
 
-        var controller = CreateController(db, otherPatientsId);
+        var controller = CreateBookingController(db, otherPatientsId);
 
-        var result = await controller.CancelBookingAsync(bookingId, CancellationToken.None);
+        var result = await controller.Cancel(bookingId, CancellationToken.None);
 
         Assert.IsType<ForbidResult>(result);
         Assert.True(await db.Bookings.AnyAsync(b => b.Id == bookingId));
@@ -129,9 +129,9 @@ public class BookingControllerCancelBookingTests
         var patientId = Guid.NewGuid();
         var missingBookingId = Guid.NewGuid();
 
-        var controller = CreateController(db, patientId);
+        var controller = CreateBookingController(db, patientId);
 
-        var result = await controller.CancelBookingAsync(missingBookingId, CancellationToken.None);
+        var result = await controller.Cancel(missingBookingId, CancellationToken.None);
 
         Assert.IsType<NotFoundResult>(result);
     }
