@@ -18,4 +18,9 @@ public class CaregiverDailyScheduleRepository(AppDbContext context)
         await _context.SaveChangesAsync();
         return caregiverDailySchedule;
     }
+
+    public async Task<CaregiverDailySchedule?> GetByIdAsync(Guid dailyScheduleId)
+    {
+        return await _context.CaregiverDailySchedules.FindAsync(dailyScheduleId);
+    }
 }
