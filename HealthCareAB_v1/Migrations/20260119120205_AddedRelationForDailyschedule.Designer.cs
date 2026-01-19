@@ -9,8 +9,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace HealthCareAB_v1.Migrations
-{
+namespace HealthCareAB_v1.Migrations;
+
     [DbContext(typeof(AppDbContext))]
     [Migration("20260119120205_AddedRelationForDailyschedule")]
     partial class AddedRelationForDailyschedule
@@ -323,4 +323,3 @@ namespace HealthCareAB_v1.Migrations
 #pragma warning restore 612, 618
         }
     }
-}

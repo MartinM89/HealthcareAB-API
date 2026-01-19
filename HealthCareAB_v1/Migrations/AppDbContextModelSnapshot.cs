@@ -8,8 +8,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace HealthCareAB_v1.Migrations
-{
+namespace HealthCareAB_v1.Migrations;
+
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
@@ -320,4 +320,3 @@ namespace HealthCareAB_v1.Migrations
 #pragma warning restore 612, 618
         }
     }
-}
