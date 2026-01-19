@@ -32,6 +32,11 @@ public class BookingService(
 
         var schedule = await _caregiverDailyScheduleService.GetByIdAsync(dto.ScheduleId);
 
+        if (schedule.Bookings.ToList().Any(b => b.TimeSlot?.Id == timeslot.Id))
+        {
+            throw new ValidationException("This time is already booked");
+        }
+
         var booking = new Booking
         {
             Id = Guid.NewGuid(),
