@@ -19,7 +19,7 @@ public class CaregiverDailyScheduleController(
         caregiverDailyScheduleService;
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(CreateCaregiverDailyScheduleDto dto)
+    public async Task<IActionResult> Create(CreateCaregiverDailyScheduleDto dto)
     {
         await _caregiverDailyScheduleService.CreateAsync(dto);
 
