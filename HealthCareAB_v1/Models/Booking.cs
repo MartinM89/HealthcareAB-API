@@ -18,6 +18,6 @@ public class Booking
     public Patient Patient { get; set; } = null!;
     // public CaregiverDailySchedule DailySchedule { get; set; } = null!;
     public Guid CaregiverDailyScheduleId { get; set; }
-    public CaregiverDailySchedule CaregiverDailySchedule {get; set;} = null!;
+    public CaregiverDailySchedule CaregiverDailySchedule { get; set; } = null!;
 
 }

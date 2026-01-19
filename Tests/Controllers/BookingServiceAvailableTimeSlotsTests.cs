@@ -43,7 +43,7 @@ public class BookingServiceAvailableTimeSlotsTests
             CaregiverStatus = status,
             CaregiverStatusId = status.Id,
             CaregiverId = Guid.NewGuid(),
-            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="c1", PasswordHash="x" } }
+            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "c1", PasswordHash = "x" } }
         };
 
         db.CaregiverStatuses.Add(status);
@@ -78,7 +78,7 @@ public class BookingServiceAvailableTimeSlotsTests
             CaregiverStatus = status,
             CaregiverStatusId = status.Id,
             CaregiverId = Guid.NewGuid(),
-            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="c1", PasswordHash="x" } }
+            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "c1", PasswordHash = "x" } }
         };
 
         var s2 = new CaregiverDailySchedule
@@ -89,13 +89,13 @@ public class BookingServiceAvailableTimeSlotsTests
             CaregiverStatus = status,
             CaregiverStatusId = status.Id,
             CaregiverId = Guid.NewGuid(),
-            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="c2", PasswordHash="x" } }
+            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "c2", PasswordHash = "x" } }
         };
 
         db.CaregiverStatuses.Add(status);
         db.CaregiverDailySchedules.AddRange(s1, s2);
 
-        var patient = new Patient { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="p1", PasswordHash="x" } };
+        var patient = new Patient { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "p1", PasswordHash = "x" } };
 
         db.Patients.Add(patient);
 
@@ -146,7 +146,7 @@ public class BookingServiceAvailableTimeSlotsTests
             CaregiverStatus = status,
             CaregiverStatusId = status.Id,
             CaregiverId = Guid.NewGuid(),
-            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="c1", PasswordHash="x" } }
+            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "c1", PasswordHash = "x" } }
         };
 
         var s2 = new CaregiverDailySchedule
@@ -157,13 +157,13 @@ public class BookingServiceAvailableTimeSlotsTests
             CaregiverStatus = status,
             CaregiverStatusId = status.Id,
             CaregiverId = Guid.NewGuid(),
-            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="c2", PasswordHash="x" } }
+            Caregiver = new Caregiver { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "c2", PasswordHash = "x" } }
         };
 
         db.CaregiverStatuses.Add(status);
         db.CaregiverDailySchedules.AddRange(s1, s2);
 
-        var patient = new Patient { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username="p1", PasswordHash="x" } };
+        var patient = new Patient { UserId = Guid.NewGuid(), User = new User { Id = Guid.NewGuid(), Username = "p1", PasswordHash = "x" } };
         db.Patients.Add(patient);
 
         db.Bookings.Add(new Booking
