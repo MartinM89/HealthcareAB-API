@@ -1,32 +1,23 @@
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
-using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Implementations;
 using HealthCareAB_v1.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace Tests.Services;
 
 public class BookingServiceTests
 {
-    private readonly DbContextOptions<AppDbContext> _dbContextOptions;
     private readonly Mock<IBookingRepository> _bookingRepositoryMock;
     private readonly BookingService _bookingService;
     private readonly Mock<ITimeSlotService> _timeSlotServiceMock;
     private readonly Mock<ICaregiverDailyScheduleService> _caregiverDailyScheduleServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
-    private readonly AppDbContext _context;
 
     public BookingServiceTests()
     {
-        _dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new AppDbContext(_dbContextOptions);
         _bookingRepositoryMock = new Mock<IBookingRepository>();
         _timeSlotServiceMock = new Mock<ITimeSlotService>();
         _caregiverDailyScheduleServiceMock = new Mock<ICaregiverDailyScheduleService>();
@@ -52,8 +43,6 @@ public class BookingServiceTests
             PasswordHash = "h",
             Patient = new Patient { },
         };
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
 
         _bookingRepositoryMock
             .Setup(r => r.CreateAsync(It.IsAny<Booking>()))
@@ -138,5 +127,77 @@ public class BookingServiceTests
         Assert.Contains("Patient not found", ex.Message);
 
         _bookingRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<Booking>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenSameTimeIsBookedTwice_ThrowsValidationExceptionAndDoesNotCallRepoAsync()
+    {
+        // Arrange:
+        _bookingRepositoryMock.Reset();
+        _caregiverDailyScheduleServiceMock.Reset();
+
+        var patientId = Guid.NewGuid();
+        var user = new User
+        {
+            Id = patientId,
+            Username = "test",
+            PasswordHash = "h",
+            Patient = new Patient { },
+        };
+
+        _bookingRepositoryMock
+            .Setup(r => r.CreateAsync(It.IsAny<Booking>()))
+            .ReturnsAsync((Booking b) => b);
+
+        // Prepare ids
+        var timeslotId = Guid.NewGuid();
+        var scheduleId = Guid.NewGuid();
+
+        // Ensure patient's UserId matches
+        user.Patient = new Patient { UserId = user.Id, User = user };
+
+        // Mock user service to return the patient
+        _userServiceMock.Setup(s => s.GetPatientByIdAsync(user.Id)).ReturnsAsync(user.Patient);
+
+        var expectedEnd = new TimeOnly(10, 0);
+        var timeslot = new TimeSlot
+        {
+            Id = timeslotId,
+            Start = new TimeOnly(9, 30),
+            End = expectedEnd,
+        };
+        _timeSlotServiceMock.Setup(s => s.GetByIdAsync(timeslotId)).ReturnsAsync(timeslot);
+
+        // Setup a dummy schedule
+        var schedule = new CaregiverDailySchedule { Id = scheduleId };
+        _caregiverDailyScheduleServiceMock
+            .Setup(s => s.GetByIdAsync(scheduleId))
+            .ReturnsAsync(schedule);
+
+        var service = _bookingService;
+
+        var dto = new CreateBookingDto
+        {
+            Comment = "Kommentar",
+            Start = new TimeOnly(9, 30),
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSlotId = timeslotId,
+            ScheduleId = scheduleId,
+        };
+        var userId = patientId.ToString();
+
+        // Act: Book the slot once (should succeed)
+        var firstBooking = await service.CreateAsync(userId, dto);
+
+        // Simulate that the schedule now contains the first booking
+        schedule.Bookings = [firstBooking];
+
+        // Act & Assert: Book the same slot again (should throw)
+        var ex = await Assert.ThrowsAsync<ValidationException>(
+            () => service.CreateAsync(userId, dto)
+        );
+        Assert.Contains("This time is already booked", ex.Message);
+
+        _bookingRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<Booking>()), Times.Once);
     }
 }
