@@ -35,6 +35,12 @@ public class UserService(IAppDbContext context) : IUserService
         return await _context.Caregivers.FirstOrDefaultAsync(c => c.UserId == caregiverId);
     }
 
+    public async Task<Patient?> GetPatientByIdAsync(Guid patientId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(patientId.ToString());
+        return await _context.Patients.FirstOrDefaultAsync(p => p.UserId == patientId);
+    }
+
     /// <inheritdoc />
     public async Task CreateUserAsync(User user)
     {
