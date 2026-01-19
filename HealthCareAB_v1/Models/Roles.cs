@@ -1,5 +1,8 @@
-﻿namespace HealthCareAB_v1.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace HealthCareAB_v1.Models;
+
+[ExcludeFromCodeCoverage]
 public static class Roles
 {
     public const string Caregiver = "CAREGIVER";
