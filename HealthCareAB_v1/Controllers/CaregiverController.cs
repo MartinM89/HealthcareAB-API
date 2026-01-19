@@ -55,15 +55,15 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
         }
         catch (NotFoundException ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new { ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(400, ex.Message);
+            return StatusCode(400, new { ex.Message });
         }
     }
 
