@@ -132,4 +132,47 @@ public class CaregiverDailyScheduleServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() => _service.CreateAsync(dto));
     }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsSchedule_WhenFoundAsync()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+        var schedule = new CaregiverDailySchedule
+        {
+            Id = id,
+            StartTime = date.ToDateTime(new TimeOnly(8, 0)).ToUniversalTime(),
+            EndTime = date.ToDateTime(new TimeOnly(16, 0)).ToUniversalTime(),
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(schedule);
+
+        // Act
+        var result = await _service.GetByIdAsync(id);
+
+        // Assert
+        Assert.Equal(id, result.Id);
+        Assert.Equal(schedule.StartTime, result.StartTime);
+        Assert.Equal(schedule.EndTime, result.EndTime);
+        _repoMock.Verify(r => r.GetByIdAsync(id), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ThrowsValidationException_WhenGuidEmptyAsync()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(() => _service.GetByIdAsync(Guid.Empty));
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ThrowsNotFoundException_WhenNotFoundAsync()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((CaregiverDailySchedule?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => _service.GetByIdAsync(id));
+    }
 }

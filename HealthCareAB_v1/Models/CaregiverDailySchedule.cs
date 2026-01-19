@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace HealthCareAB_v1.Models;
 
 public class CaregiverDailySchedule
@@ -13,5 +15,6 @@ public class CaregiverDailySchedule
     public Guid CaregiverStatusId { get; set; }
     public CaregiverStatus CaregiverStatus { get; set; } = null!;
 
+    [JsonIgnore]
     public ICollection<Booking> Bookings { get; set; } = [];
 }
