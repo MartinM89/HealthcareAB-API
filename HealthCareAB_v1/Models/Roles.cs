@@ -2,14 +2,15 @@
 
 public static class Roles
 {
-    public const string Caregiver = "CAREGIVER";
     public const string Patient = "PATIENT";
+    public const string Caregiver = "CAREGIVER";
+    public const string Dentist = "DENTIST";
 
-    // Helper method to validate roles
-    public static bool IsValidRole(string role)
+    public static IReadOnlyList<string> ValidCaregiverRoles => [Caregiver, Dentist];
+
+    // Helper method to validate caregiver roles
+    public static bool IsValidCaregiverRole(string role)
     {
-        return role is Caregiver or Patient;
+        return ValidCaregiverRoles.Contains(role);
     }
-
-    public static IReadOnlyList<string> AllRoles => [Caregiver, Patient];
 }

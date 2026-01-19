@@ -1,5 +1,6 @@
 ﻿using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.DTOs.Auth;
+using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.Extensions.Options;
@@ -63,11 +64,17 @@ public class AuthService(
             return new AuthResponseDto { Success = false, Message = "Username is already taken" };
         }
 
+        // Throws an ValidationException if a role that doesn't exist is sent with the dto
+        DetermineValidRoles(registerDto.Roles);
+
+        // Determine roles with security check
+        var roles = DetermineCaregiverRoles(registerDto.Roles);
+
         var user = new User
         {
             Username = registerDto.Username,
             PasswordHash = _userService.HashPassword(registerDto.Password),
-            Roles = [Roles.Caregiver],
+            Roles = roles,
             Caregiver = new Caregiver { },
         };
 
@@ -80,6 +87,42 @@ public class AuthService(
             Username = user.Username,
             Roles = user.Roles,
         };
+    }
+
+    /// <summary>
+    /// Detemines if the roles for a new caregiver are valid.
+    /// </summary>
+    private static void DetermineValidRoles(List<string> roles)
+    {
+        if (roles.Count == 0)
+        {
+            return;
+        }
+
+        var rolesToCheck = roles.Select(Roles.IsValidCaregiverRole).ToList();
+
+        for (var i = 0; i < rolesToCheck.Count; i++)
+        {
+            if (!rolesToCheck[i])
+            {
+                throw new ValidationException($"Caregiver cannot have role: {roles[i]}.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determines the roles for a new caregiver.
+    /// Default role is set to CAREGIVER.
+    /// </summary>
+    private static List<string> DetermineCaregiverRoles(List<string> requestedRoles)
+    {
+        if (requestedRoles == null || requestedRoles.Count == 0)
+        {
+            return [Roles.Caregiver];
+        }
+
+        // Return requested roles (original behavior)
+        return requestedRoles;
     }
 
     /// <inheritdoc />
