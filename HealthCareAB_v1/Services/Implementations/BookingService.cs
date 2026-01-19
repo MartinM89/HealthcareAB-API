@@ -52,7 +52,7 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         CancellationToken ct
     )
     {
-        var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
+        var booking = await _bookingRepository.GetByIdAsync(bookingId, ct);
 
         if (booking == null)
         {
@@ -74,9 +74,12 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         return start.AddMinutes(finalTime);
     }
 
-    public async Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct)
+    public async Task<List<BookingResponseDto>> GetByPatientIdAsync(
+        Guid patientId,
+        CancellationToken ct
+    )
     {
-        var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
+        var bookings = await _bookingRepository.GetByPatientIdAsync(patientId, ct);
 
         var now = DateTime.UtcNow;
 
@@ -96,16 +99,19 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             .OrderByDescending(b => b.Date)
             .ThenByDescending(b => b.TimeSlot.Start);
 
-        return [.. upcoming
-            .Concat(past)
-            .Select(b => new BookingResponseDto
-            {
-                Id = b.Id,
-                Comment = b.Comment,
-                CreatedAt = b.CreatedAt,
-                Date = b.Date,
-                Start = b.TimeSlot.Start,
-                End = b.TimeSlot.End,
-            })];
+        return
+        [
+            .. upcoming
+                .Concat(past)
+                .Select(b => new BookingResponseDto
+                {
+                    Id = b.Id,
+                    Comment = b.Comment,
+                    CreatedAt = b.CreatedAt,
+                    Date = b.Date,
+                    Start = b.TimeSlot.Start,
+                    End = b.TimeSlot.End,
+                }),
+        ];
     }
 }
