@@ -30,7 +30,7 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Test with coverage
-        run: dotnet test --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage" --results-directory ./coverage
+        run: dotnet test --no-build --settings Tests/coverage.runsettings --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Check 80% coverage threshold
         run: |
