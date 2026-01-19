@@ -408,7 +408,7 @@ public class CaregiverServiceTests
 
         _caregiverRepoMock
             .Setup(repo => repo.GetPatientByIdAsync(bookingRequest))
-            .ReturnsAsync((Patient)null!);
+            .ReturnsAsync(null as Patient);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(
@@ -420,6 +420,64 @@ public class CaregiverServiceTests
 
         _caregiverRepoMock.Verify(
             repo => repo.GetCaregiversDailyScheduleAsync(It.IsAny<CaregiverCreateBookingDto>()),
+            Times.Never
+        );
+        _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_WhenDailyScheduleNotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+        var caregiverId = Guid.NewGuid();
+        var patientId = Guid.NewGuid();
+        var scheduleId = Guid.NewGuid();
+        var timeSlotId = Guid.NewGuid();
+
+        var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
+
+        var bookingRequest = new CaregiverCreateBookingDto
+        {
+            PatientId = patientId,
+            CaregiverDailyScheduleId = scheduleId,
+            TimeSlotId = timeSlotId,
+            Date = bookingDate,
+            Comment = "Mina axlar mycke ont",
+        };
+
+        var patient = new Patient
+        {
+            UserId = caregiverId,
+            User = new User
+            {
+                Id = patientId,
+                Username = "dzengizprentic",
+                FirstName = "Dzengiz",
+                LastName = "Prentic",
+                PhoneNumber = "076111636",
+                PasswordHash = "tihi123!",
+            },
+        };
+
+        _caregiverRepoMock
+            .Setup(repo => repo.GetPatientByIdAsync(bookingRequest))
+            .ReturnsAsync(patient);
+
+        _caregiverRepoMock
+            .Setup(repo => repo.GetCaregiversDailyScheduleAsync(bookingRequest))
+            .ReturnsAsync(null as CaregiverDailySchedule);
+
+        // Act & Assert
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            async () =>
+                await _caregiverService.CreateBookingForPatientAsync(caregiverId, bookingRequest)
+        );
+
+        Assert.Equal($"Schedule with ID {scheduleId} not found", exception.Message);
+
+        _caregiverRepoMock.Verify(
+            repo => repo.GetTimeSlotAsync(It.IsAny<CaregiverCreateBookingDto>()),
             Times.Never
         );
         _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
