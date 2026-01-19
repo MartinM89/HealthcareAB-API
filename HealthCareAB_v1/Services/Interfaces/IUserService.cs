@@ -1,4 +1,4 @@
-﻿using HealthCareAB_v1.Models;
+using HealthCareAB_v1.Models;
 
 namespace HealthCareAB_v1.Services.Interfaces;
 
@@ -10,4 +10,5 @@ public interface IUserService
     string HashPassword(string password);
     bool VerifyPassword(string enteredPassword, string storedHash);
     Task<Caregiver?> GetCaregiverByIdAsync(Guid caregiverId);
+    Task<Patient?> GetPatientByIdAsync(Guid patientId);
 }

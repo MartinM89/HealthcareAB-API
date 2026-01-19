@@ -26,7 +26,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         return booking;
     }
 
-    public Task<Booking?> GetByIdWithPatientAsync(Guid bookingId, CancellationToken ct) =>
+    public Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken ct) =>
         _context
             .Bookings.Include(b => b.Patient)
             .ThenInclude(p => p.User)
@@ -38,7 +38,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<List<Booking>> GetForPatientAsync(Guid patientId, CancellationToken ct) =>
+    public async Task<List<Booking>> GetByPatientIdAsync(Guid patientId, CancellationToken ct) =>
         await _context
             .Bookings.AsNoTracking()
             .Include(b => b.TimeSlot)

@@ -9,5 +9,5 @@ public interface IBookingService
     Task<Booking> CreateAsync(string userId, CreateBookingDto dto);
     Task<CancelBookingResult> CancelAsync(Guid bookingId, Guid patientId, CancellationToken ct);
 
-    Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct);
+    Task<List<BookingResponseDto>> GetByPatientIdAsync(Guid patientId, CancellationToken ct);
 }

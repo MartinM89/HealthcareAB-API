@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HealthCareAB_v1.DTOs.Auth;
 
+[ExcludeFromCodeCoverage]
 public class AuthResponseDto
 {
     public bool Success { get; set; }

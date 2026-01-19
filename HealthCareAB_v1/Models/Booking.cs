@@ -24,5 +24,5 @@ public class Booking
     public Patient Patient { get; set; } = null!;
 
     [JsonIgnore]
-    public CaregiverDailySchedule CaregiverDailySchedule { get; set; } = null!;
+    public CaregiverDailySchedule DailySchedule { get; set; } = null!;
 }

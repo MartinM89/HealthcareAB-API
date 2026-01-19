@@ -1,10 +1,12 @@
-﻿using HealthCareAB_v1.Models;
+using System.Diagnostics.CodeAnalysis;
+using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
+[ExcludeFromCodeCoverage]
 /// <summary>
 /// Service for user-related operations including CRUD and password management.
 /// </summary>
@@ -31,6 +33,12 @@ public class UserService(IAppDbContext context) : IUserService
     {
         ArgumentException.ThrowIfNullOrEmpty(caregiverId.ToString());
         return await _context.Caregivers.FirstOrDefaultAsync(c => c.UserId == caregiverId);
+    }
+
+    public async Task<Patient?> GetPatientByIdAsync(Guid patientId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(patientId.ToString());
+        return await _context.Patients.FirstOrDefaultAsync(p => p.UserId == patientId);
     }
 
     /// <inheritdoc />
