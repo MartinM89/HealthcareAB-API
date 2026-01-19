@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Repositories.Implementations;
 
+[ExcludeFromCodeCoverage]
 public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
 {
     private readonly IAppDbContext _context = context;
@@ -25,10 +27,10 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
             .Where(schedule => schedule.StartTime <= endDate && schedule.EndTime >= startDate)
             .Include(schedule => schedule.CaregiverStatus)
             .Include(schedule => schedule.Bookings)
-            .ThenInclude(booking => booking.Patient)
-            .ThenInclude(patient => patient.User)
+                .ThenInclude(booking => booking.Patient)
+                    .ThenInclude(patient => patient.User)
             .Include(schedule => schedule.Bookings)
-            .ThenInclude(booking => booking.TimeSlot)
+                .ThenInclude(booking => booking.TimeSlot)
             .OrderBy(schedule => schedule.StartTime)
             .ToListAsync();
 
