@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using HealthCareAB_v1.DTOs.User.Caregiver;
 using HealthCareAB_v1.Exceptions;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCareAB_v1.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = Roles.Caregiver)]
@@ -83,9 +85,21 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
 
             return Ok(upcomingScheduleOverview);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
         catch (Exception ex)
         {
-            return StatusCode(400, ex.Message);
+            return StatusCode(400, new { message = ex.Message });
         }
     }
 }

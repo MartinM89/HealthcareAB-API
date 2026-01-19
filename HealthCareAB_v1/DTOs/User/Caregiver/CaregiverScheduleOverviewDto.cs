@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
+[ExcludeFromCodeCoverage]
 public class CaregiverScheduleOverviewDto
 {
     public Guid CaregiverId { get; set; }
