@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HealthCareAB_v1.DTOs.Auth;
 
+[ExcludeFromCodeCoverage]
 public class RegisterPatientDto
 {
     [Required(ErrorMessage = "Username is required")]
@@ -21,6 +23,7 @@ public class RegisterPatientDto
     public required string Password { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class RegisterCaregiverDto
 {
     [Required(ErrorMessage = "Username is required")]

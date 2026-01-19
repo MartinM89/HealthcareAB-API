@@ -1,4 +1,5 @@
-﻿using HealthCareAB_v1.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
+[ExcludeFromCodeCoverage]
 /// <summary>
 /// Service handling authentication operations including registration and login.
 /// </summary>

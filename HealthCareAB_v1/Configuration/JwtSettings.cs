@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HealthCareAB_v1.Configuration;
 
+[ExcludeFromCodeCoverage]
 /// <summary>
 /// Strongly-typed JWT configuration settings.
 /// Bound from appsettings.json "JwtSettings" section.

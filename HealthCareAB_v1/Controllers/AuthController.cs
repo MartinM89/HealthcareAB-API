@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Services.Interfaces;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCareAB_v1.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]

@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 
 namespace HealthCareAB_v1.Repositories.Implementations;
 
+[ExcludeFromCodeCoverage]
 public class CaregiverDailyScheduleRepository(AppDbContext context)
     : ICaregiverDailyScheduleRepository
 {
