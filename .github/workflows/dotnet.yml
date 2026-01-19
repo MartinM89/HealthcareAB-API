@@ -42,3 +42,6 @@ jobs:
             exit 1
           fi
           echo "✅ Passed: ${PERCENT}% >= 80%"
+
+      - name: Dotnet Format
+        run: dotnet format -v detailed --verify-no-changes
