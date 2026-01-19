@@ -13,7 +13,11 @@ public class RegisterPatientDto
     public required string Username { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters")]
+    [PasswordIncludesUppercase]
+    [PasswordIncludesLowercase]
+    [PasswordIncludeDigit]
+    [PasswordIncludeSpecialCharacter]
     public required string Password { get; set; }
 }
 
@@ -28,7 +32,11 @@ public class RegisterCaregiverDto
     public required string Username { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters")]
+    [PasswordIncludesUppercase]
+    [PasswordIncludesLowercase]
+    [PasswordIncludeDigit]
+    [PasswordIncludeSpecialCharacter]
     public required string Password { get; set; }
 
     /// // <summary>
@@ -38,4 +46,64 @@ public class RegisterCaregiverDto
     /// Non-admin requests with Admin role will be ignored (defaults to User).
     /// </summary>
     public List<string> Roles { get; set; } = [];
+}
+
+public class PasswordIncludesUppercaseAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        var password = value as string;
+
+        return !string.IsNullOrWhiteSpace(password) && password.Any(char.IsUpper);
+    }
+
+    public override string FormatErrorMessage(string name)
+    {
+        return "Password must include at least one uppercase character.";
+    }
+}
+
+public class PasswordIncludesLowercaseAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        var password = value as string;
+
+        return !string.IsNullOrWhiteSpace(password) && password.Any(char.IsLower);
+    }
+
+    public override string FormatErrorMessage(string name)
+    {
+        return "Password must include at least one lowercase character.";
+    }
+}
+
+public class PasswordIncludeDigitAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        var password = value as string;
+
+        return !string.IsNullOrWhiteSpace(password) && password.Any(char.IsDigit);
+    }
+
+    public override string FormatErrorMessage(string name)
+    {
+        return "Password must include at least one digit.";
+    }
+}
+
+public class PasswordIncludeSpecialCharacterAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value)
+    {
+        var password = value as string;
+
+        return !string.IsNullOrWhiteSpace(password) && password.Any(c => !char.IsLetterOrDigit(c));
+    }
+
+    public override string FormatErrorMessage(string name)
+    {
+        return "Password must include at least one special character.";
+    }
 }
