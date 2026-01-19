@@ -1,4 +1,5 @@
-﻿using System.Text;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.Constants;
 using HealthCareAB_v1.Repositories.Implementations;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HealthCareAB_v1.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
@@ -23,6 +25,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<ICaregiverRepository, CaregiverRepository>();
         services.AddScoped<ICaregiverService, CaregiverService>();
+        services.AddScoped<ITimeSlotService, TimeSlotService>();
+        services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
         services.AddScoped<ICaregiverDailyScheduleService, CaregiverDailyScheduleService>();
         services.AddScoped<ICaregiverDailyScheduleRepository, CaregiverDailyScheduleRepository>();
         services.AddScoped<ICaregiverStatusService, CaregiverStatusService>();

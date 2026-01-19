@@ -54,4 +54,15 @@ public class CaregiverDailyScheduleService(
 
         return await _caregiverDailyScheduleRepository.CreateAsync(dailySchedule);
     }
+
+    public async Task<CaregiverDailySchedule> GetByIdAsync(Guid dailyScheduleId)
+    {
+        if (dailyScheduleId == Guid.Empty)
+        {
+            throw new ValidationException("Guid can't be empty");
+        }
+
+        return await _caregiverDailyScheduleRepository.GetByIdAsync(dailyScheduleId)
+            ?? throw new NotFoundException("Caregiver daily schedule not found");
+    }
 }

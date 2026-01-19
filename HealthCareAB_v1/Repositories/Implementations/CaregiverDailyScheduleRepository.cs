@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Repositories.Implementations;
 
+[ExcludeFromCodeCoverage]
 public class CaregiverDailyScheduleRepository(AppDbContext context)
     : ICaregiverDailyScheduleRepository
 {
@@ -15,5 +18,12 @@ public class CaregiverDailyScheduleRepository(AppDbContext context)
         _context.CaregiverDailySchedules.Add(caregiverDailySchedule);
         await _context.SaveChangesAsync();
         return caregiverDailySchedule;
+    }
+
+    public async Task<CaregiverDailySchedule?> GetByIdAsync(Guid dailyScheduleId)
+    {
+        return await _context
+            .CaregiverDailySchedules.Include(s => s.Bookings)
+            .FirstOrDefaultAsync(s => s.Id == dailyScheduleId);
     }
 }

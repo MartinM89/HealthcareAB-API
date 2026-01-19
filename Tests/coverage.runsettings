@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+<DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <ExcludeByFile>
+          **/Migrations/**/*.cs,
+          **/Configuration/**/*.cs,
+          **/Program.cs,
+          </ExcludeByFile>
+          <ExcludeByAttribute>ExcludeFromCodeCoverageAttribute,GeneratedCodeAttribute</ExcludeByAttribute>
+          <Include>[HealthCareAB_v1]*</Include>
+          <Exclude>[*.Tests]*</Exclude>
+          <SkipAutoProps>true</SkipAutoProps>
+          <Format>cobertura</Format>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

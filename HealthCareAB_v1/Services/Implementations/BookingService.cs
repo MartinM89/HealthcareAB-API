@@ -1,7 +1,6 @@
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
-using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using HealthCareAB_v1.Services.Results;
@@ -9,24 +8,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
-public class BookingService(IBookingRepository bookingRepository, AppDbContext appDbContext)
-    : IBookingService
+public class BookingService(
+    IBookingRepository bookingRepository,
+    ITimeSlotService timeSlotService,
+    ICaregiverDailyScheduleService caregiverDailyScheduleService,
+    IUserService userService
+) : IBookingService
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
     private readonly IBookingRepository _bookingRepository = bookingRepository;
-    private const double durationInMinutes = 30;
+    private readonly ITimeSlotService _timeSlotService = timeSlotService;
+    private readonly ICaregiverDailyScheduleService _caregiverDailyScheduleService =
+        caregiverDailyScheduleService;
+
+    private readonly IUserService _userService = userService;
 
     public async Task<Booking> CreateAsync(string userId, CreateBookingDto dto)
     {
-        var user =
-            await _appDbContext
-                .Users.Include(u => u.Patient)
-                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId))
-            ?? throw new NotFoundException("Patient not found");
+        var patient =
+            await _userService.GetPatientByIdAsync(Guid.Parse(userId))
+            ?? throw new NotFoundException("Patient not found.");
 
-        if (user.Patient is null)
+        var timeslot = await _timeSlotService.GetByIdAsync(dto.TimeSlotId);
+
+        var schedule = await _caregiverDailyScheduleService.GetByIdAsync(dto.ScheduleId);
+
+        if (schedule.Bookings.ToList().Any(b => b.TimeSlot?.Id == timeslot.Id))
         {
-            throw new NotFoundException("Patient not found");
+            throw new ValidationException("This time is already booked");
         }
 
         var booking = new Booking
@@ -35,12 +43,9 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
             Comment = dto.Comment ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
-            TimeSlot = new TimeSlot
-            {
-                Start = dto.Start,
-                End = SetEnd(dto.Start, durationInMinutes),
-            },
-            Patient = user.Patient,
+            TimeSlot = timeslot,
+            Patient = patient,
+            DailySchedule = schedule,
         };
 
         return await _bookingRepository.CreateAsync(booking);
@@ -52,40 +57,60 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         CancellationToken ct
     )
     {
-        var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
+        var booking = await _bookingRepository.GetByIdAsync(bookingId, ct);
 
         if (booking == null)
         {
-            return CancelBookingResult.NotFound;
+            return CancelBookingResult.BookingDoesNotExist;
         }
 
         if (booking.Patient == null || booking.Patient.UserId != patientId)
         {
-            return CancelBookingResult.Forbidden;
+            return CancelBookingResult.NotOwnedByPatient;
         }
 
         await _bookingRepository.DeleteAsync(booking, ct);
-        return CancelBookingResult.Success;
+        return CancelBookingResult.Cancelled;
     }
 
-    private static TimeOnly SetEnd(TimeOnly start, double timeLength)
+    public async Task<List<BookingResponseDto>> GetByPatientIdAsync(
+        Guid patientId,
+        CancellationToken ct
+    )
     {
-        var finalTime = timeLength;
-        return start.AddMinutes(finalTime);
-    }
+        var bookings = await _bookingRepository.GetByPatientIdAsync(patientId, ct);
 
-    public async Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct)
-    {
-        var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
+        var now = DateTime.UtcNow;
 
-        return [.. bookings.Select(b => new BookingResponseDto
+        bool IsPast(Booking b)
         {
-            Id = b.Id,
-            Comment = b.Comment,
-            CreatedAt = b.CreatedAt,
-            Date = b.Date,
-            Start = b.TimeSlot.Start,
-            End = b.TimeSlot.End,
-        })];
+            var end = b.Date.ToDateTime(b.TimeSlot.End);
+            return end < now;
+        }
+
+        var upcoming = bookings
+            .Where(b => !IsPast(b))
+            .OrderBy(b => b.Date)
+            .ThenBy(b => b.TimeSlot.Start);
+
+        var past = bookings
+            .Where(IsPast)
+            .OrderByDescending(b => b.Date)
+            .ThenByDescending(b => b.TimeSlot.Start);
+
+        return
+        [
+            .. upcoming
+                .Concat(past)
+                .Select(b => new BookingResponseDto
+                {
+                    Id = b.Id,
+                    Comment = b.Comment,
+                    CreatedAt = b.CreatedAt,
+                    Date = b.Date,
+                    Start = b.TimeSlot.Start,
+                    End = b.TimeSlot.End,
+                }),
+        ];
     }
 }

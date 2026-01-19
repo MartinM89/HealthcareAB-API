@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HealthCareAB_v1.Models;
 
+[ExcludeFromCodeCoverage]
 public class Review
 {
     public Guid Id { get; set; }
