@@ -1,4 +1,5 @@
 using HealthCareAB_v1.DTOs.User.Caregiver;
+using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 
@@ -14,11 +15,27 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
         DateTime endDate
     )
     {
-        var schedules = await _caregiverRepository.GetSchedulesWithBookingsAsync(
-            caregiverId,
-            startDate,
-            endDate
-        );
+        if (caregiverId == Guid.Empty)
+        {
+            throw new ArgumentException("Caregiver ID cannot be empty");
+        }
+
+        if (endDate < startDate)
+        {
+            throw new ArgumentException("End date cannot be before start date");
+        }
+
+        if ((endDate - startDate).TotalDays > 30)
+        {
+            throw new ArgumentException("Date range cannot exceed 30 days", nameof(endDate));
+        }
+
+        var schedules =
+            await _caregiverRepository.GetSchedulesWithBookingsAsync(
+                caregiverId,
+                startDate,
+                endDate
+            ) ?? throw new NotFoundException($"Caregiver with ID {caregiverId} not found");
 
         return new CaregiverScheduleOverviewDto
         {
