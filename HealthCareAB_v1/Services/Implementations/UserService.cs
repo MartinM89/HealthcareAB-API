@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;

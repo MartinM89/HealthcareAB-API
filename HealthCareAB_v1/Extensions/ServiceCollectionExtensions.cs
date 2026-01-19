@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.Constants;
