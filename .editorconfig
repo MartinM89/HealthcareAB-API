@@ -102,6 +102,13 @@ dotnet_diagnostic.IDE0305.severity = none # Ignore Collection initialization can
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1001.severity = none
 
+# Disable Async suffix enforcement for tests
+[Tests/**.cs]
+dotnet_naming_rule.async_methods_must_end_in_async.severity = none
+
+# Disable Async suffix enforcement for controllers
+[**/Controllers/**.cs]
+dotnet_naming_rule.async_methods_must_end_in_async.severity = none
 
 ########################################
 # XML / .csproj files

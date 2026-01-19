@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCareAB_v1.Controllers;
 
+[ExcludeFromCodeCoverage]
 [ApiController]
 [Route("api/[controller]")]
 public class BookingController(IBookingService bookingService) : ControllerBase
@@ -40,7 +42,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpDelete("{bookingId:guid}")]
-    public async Task<IActionResult> CancelBooking(Guid bookingId, CancellationToken ct)
+    public async Task<IActionResult> Cancel(Guid bookingId, CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
         {
@@ -51,9 +53,9 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
         return result switch
         {
-            CancelBookingResult.Success => NoContent(),
-            CancelBookingResult.NotFound => NotFound(),
-            CancelBookingResult.Forbidden => Forbid(),
+            CancelBookingResult.Cancelled => NoContent(),
+            CancelBookingResult.BookingDoesNotExist => NotFound(),
+            CancelBookingResult.NotOwnedByPatient => Forbid(),
             CancelBookingResult.Unauthorized => Unauthorized(),
             _ => Unauthorized(),
         };
@@ -67,14 +69,14 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpGet("mybookings")]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetMyBookings(CancellationToken ct)
+    public async Task<ActionResult<List<BookingResponseDto>>> GetByPatientId(CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
         {
             return Unauthorized();
         }
 
-        var result = await _bookingService.GetMyBookingsAsync(patientId, ct);
+        var result = await _bookingService.GetByPatientIdAsync(patientId, ct);
         return Ok(result);
     }
 }

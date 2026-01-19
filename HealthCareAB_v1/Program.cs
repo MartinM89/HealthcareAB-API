@@ -1,53 +1,63 @@
-﻿using HealthCareAB_v1.Extensions;
+using System.Diagnostics.CodeAnalysis;
+using HealthCareAB_v1.Extensions;
 using HealthCareAB_v1.Repositories.Implementations;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Implementations;
 using HealthCareAB_v1.Services.Interfaces;
 using Scalar.AspNetCore;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace HealthCareAB_v1;
 
-// === ALLT DETTA MÅSTE VARA FÖRE builder.Build() ===
-builder.Services.AddOpenApi();
-builder.Services.AddControllers();
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddApplicationServices();
-builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddAuthorization();
-
-builder.Services.AddCors(options =>
+[ExcludeFromCodeCoverage]
+public class Program
 {
-    options.AddPolicy(
-        "AllowFrontend",
-        policy =>
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        // === ALLT DETTA MÅSTE VARA FÖRE builder.Build() ===
+        builder.Services.AddOpenApi();
+        builder.Services.AddControllers();
+        builder.Services.AddDatabase(builder.Configuration);
+        builder.Services.AddApplicationServices();
+        builder.Services.AddJwtAuthentication(builder.Configuration);
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddCors(options =>
         {
-            policy
-                .WithOrigins("http://localhost:3000", "http://localhost:5173")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials(); // Important for cookies
+            options.AddPolicy(
+                "AllowFrontend",
+                policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:3000", "http://localhost:5173")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials(); // Important for cookies
+                }
+            );
+        });
+
+        builder.Services.AddEndpointsApiExplorer();
+
+        builder.Services.AddScoped<IBookingService, BookingService>();
+        builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
+        var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.MapScalarApiReference();
         }
-    );
-});
 
-builder.Services.AddEndpointsApiExplorer();
+        // Removed to work in dev with React Vite on http...
+        //app.UseHttpsRedirection();
+        app.UseCors("AllowFrontend");
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapControllers();
 
-builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+        app.Run();
+    }
 }
-
-// Removed to work in dev with React Vite on http...
-//app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run();

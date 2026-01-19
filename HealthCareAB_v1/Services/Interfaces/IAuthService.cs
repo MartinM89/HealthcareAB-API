@@ -1,4 +1,4 @@
-﻿using HealthCareAB_v1.DTOs.Auth;
+using HealthCareAB_v1.DTOs.Auth;
 
 namespace HealthCareAB_v1.Services.Interfaces;
 

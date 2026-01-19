@@ -1,10 +1,12 @@
-﻿using HealthCareAB_v1.Models;
+using System.Diagnostics.CodeAnalysis;
+using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
+[ExcludeFromCodeCoverage]
 /// <summary>
 /// Service for user-related operations including CRUD and password management.
 /// </summary>

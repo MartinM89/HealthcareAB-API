@@ -52,20 +52,20 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         CancellationToken ct
     )
     {
-        var booking = await _bookingRepository.GetByIdWithPatientAsync(bookingId, ct);
+        var booking = await _bookingRepository.GetByIdAsync(bookingId, ct);
 
         if (booking == null)
         {
-            return CancelBookingResult.NotFound;
+            return CancelBookingResult.BookingDoesNotExist;
         }
 
         if (booking.Patient == null || booking.Patient.UserId != patientId)
         {
-            return CancelBookingResult.Forbidden;
+            return CancelBookingResult.NotOwnedByPatient;
         }
 
         await _bookingRepository.DeleteAsync(booking, ct);
-        return CancelBookingResult.Success;
+        return CancelBookingResult.Cancelled;
     }
 
     private static TimeOnly SetEnd(TimeOnly start, double timeLength)
@@ -74,18 +74,44 @@ public class BookingService(IBookingRepository bookingRepository, AppDbContext a
         return start.AddMinutes(finalTime);
     }
 
-    public async Task<List<BookingResponseDto>> GetMyBookingsAsync(Guid patientId, CancellationToken ct)
+    public async Task<List<BookingResponseDto>> GetByPatientIdAsync(
+        Guid patientId,
+        CancellationToken ct
+    )
     {
-        var bookings = await _bookingRepository.GetForPatientAsync(patientId, ct);
+        var bookings = await _bookingRepository.GetByPatientIdAsync(patientId, ct);
 
-        return [.. bookings.Select(b => new BookingResponseDto
+        var now = DateTime.UtcNow;
+
+        bool IsPast(Booking b)
         {
-            Id = b.Id,
-            Comment = b.Comment,
-            CreatedAt = b.CreatedAt,
-            Date = b.Date,
-            Start = b.TimeSlot.Start,
-            End = b.TimeSlot.End,
-        })];
+            var end = b.Date.ToDateTime(b.TimeSlot.End);
+            return end < now;
+        }
+
+        var upcoming = bookings
+            .Where(b => !IsPast(b))
+            .OrderBy(b => b.Date)
+            .ThenBy(b => b.TimeSlot.Start);
+
+        var past = bookings
+            .Where(IsPast)
+            .OrderByDescending(b => b.Date)
+            .ThenByDescending(b => b.TimeSlot.Start);
+
+        return
+        [
+            .. upcoming
+                .Concat(past)
+                .Select(b => new BookingResponseDto
+                {
+                    Id = b.Id,
+                    Comment = b.Comment,
+                    CreatedAt = b.CreatedAt,
+                    Date = b.Date,
+                    Start = b.TimeSlot.Start,
+                    End = b.TimeSlot.End,
+                }),
+        ];
     }
 }

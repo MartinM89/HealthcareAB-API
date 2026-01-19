@@ -26,10 +26,10 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         return booking;
     }
 
-    public Task<Booking?> GetByIdWithPatientAsync(Guid bookingId, CancellationToken ct) =>
+    public Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken ct) =>
         _context
             .Bookings.Include(b => b.Patient)
-            .ThenInclude(p => p.User)
+                .ThenInclude(p => p.User)
             .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
 
     public async Task DeleteAsync(Booking booking, CancellationToken ct)

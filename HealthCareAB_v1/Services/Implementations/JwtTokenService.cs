@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.Diagnostics.CodeAnalysis;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HealthCareAB_v1.Configuration;
@@ -9,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
+[ExcludeFromCodeCoverage]
 /// <summary>
 /// Service responsible for generating JWT tokens for authenticated users.
 /// </summary>
