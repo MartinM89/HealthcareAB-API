@@ -99,7 +99,7 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
     )
     {
         var patient =
-            _caregiverRepository.GetPatientByIdAsync(request)
+            await _caregiverRepository.GetPatientByIdAsync(request)
             ?? throw new NotFoundException($"Patient with ID {request.PatientId} not found");
 
         var dailySchedule =
