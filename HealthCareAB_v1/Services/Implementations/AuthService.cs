@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Configuration;
 using HealthCareAB_v1.DTOs.Auth;
 using HealthCareAB_v1.Exceptions;
