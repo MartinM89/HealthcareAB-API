@@ -38,7 +38,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<List<Booking>> GetForPatientAsync(Guid patientId, CancellationToken ct) =>
+    public async Task<List<Booking>> GetByPatientIdAsync(Guid patientId, CancellationToken ct) =>
         await _context
             .Bookings.AsNoTracking()
             .Include(b => b.TimeSlot)

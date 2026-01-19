@@ -27,7 +27,7 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
 
         if ((endDate - startDate).TotalDays > 30)
         {
-            throw new ArgumentException("Date range cannot exceed 30 days", nameof(endDate));
+            throw new ArgumentException("Date range cannot exceed 30 days");
         }
 
         var schedules =

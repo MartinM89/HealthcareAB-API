@@ -211,4 +211,82 @@ public class CaregiverServiceTests
         Assert.Equal("Michail", bookingsList[1].Patient.LastName);
         Assert.Equal(new TimeOnly(14, 0), bookingsList[1].TimeSlot.Start);
     }
+
+    [Fact]
+    public async Task GetScheduleOverviewAsync_WhenCaregiverIdIsEmpty_ThrowArgumentException()
+    {
+        // Arrange
+        var caregiverId = Guid.Empty;
+        var startDate = DateTime.UtcNow.Date;
+        var endDate = startDate.AddDays(7);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        );
+
+        Assert.Equal("Caregiver ID cannot be empty", exception.Message);
+
+        _caregiverRepoMock.Verify(
+            repo =>
+                repo.GetSchedulesWithBookingsAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ),
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task GetScheduleOverviewAsync_WhenEndDateIsBeforeStartDate_ThrowArgumentException()
+    {
+        // Arrange
+        var caregiverId = Guid.NewGuid();
+        var startDate = DateTime.UtcNow.Date;
+        var endDate = DateTime.UtcNow.Date.AddDays(-7);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        );
+
+        Assert.Equal("End date cannot be before start date", exception.Message);
+
+        _caregiverRepoMock.Verify(
+            repo =>
+                repo.GetSchedulesWithBookingsAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ),
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task GetScheduleOverviewAsync_WhenDateRangeExceedsThirtyDays_ThrowArgumentException()
+    {
+        // Arrange
+        var caregiverId = Guid.NewGuid();
+        var startDate = DateTime.UtcNow.Date;
+        var endDate = DateTime.UtcNow.Date.AddDays(31);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        );
+
+        Assert.Equal("Date range cannot exceed 30 days", exception.Message);
+
+        _caregiverRepoMock.Verify(
+            repo =>
+                repo.GetSchedulesWithBookingsAsync(
+                    It.IsAny<Guid>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>()
+                ),
+            Times.Never
+        );
+    }
 }
