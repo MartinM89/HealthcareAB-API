@@ -64,7 +64,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpGet("mybookings")]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetByPatientId(CancellationToken ct)
+    public async Task<ActionResult<object>> GetByPatientId(CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
         {
