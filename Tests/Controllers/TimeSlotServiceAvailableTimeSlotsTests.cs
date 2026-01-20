@@ -257,7 +257,7 @@ public class TimeSlotServiceTests
             },
         };
 
-        var timeOnly = new TimeOnly(8, 30);
+        var timeOnly = new TimeOnly(7, 30);
         var fixedGuid = Guid.NewGuid();
         for (var i = 0; i < 16; i++)
         {
@@ -271,7 +271,7 @@ public class TimeSlotServiceTests
                 Bookings = [],
             };
 
-            if (i == 0)
+            if (i == 6)
             {
                 timeSlot.Id = fixedGuid;
             }
@@ -313,7 +313,7 @@ public class TimeSlotServiceTests
 
         var result = await service.GetAvailableTimeSlotsAsync(date, CancellationToken.None);
 
-        var slot = result.Single(r => r.Start == "09:00");
+        var slot = result.Single(r => r.Start == "11:00");
         Assert.True(slot.IsAvailable);
         Assert.NotNull(slot.ScheduleId);
 
