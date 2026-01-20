@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
-using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Services.Interfaces;
@@ -73,13 +72,6 @@ public class BookingController(IBookingService bookingService) : ControllerBase
         }
 
         var result = await _bookingService.GetByPatientIdAsync(patientId, ct);
-        return Ok(result);
-    }
-
-    [HttpGet("available-timeslots")]
-    public async Task<ActionResult<List<TimeSlotAvailabilityDto>>> GetAvailableTimeSlots([FromQuery] DateOnly date, CancellationToken ct)
-    {
-        var result = await _bookingService.GetAvailableTimeSlotsAsync(date, ct);
         return Ok(result);
     }
 

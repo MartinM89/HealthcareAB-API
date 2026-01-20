@@ -1,4 +1,3 @@
-using HealthCareAB_v1.DTOs;
 using HealthCareAB_v1.DTOs.Booking;
 using HealthCareAB_v1.Exceptions;
 using HealthCareAB_v1.Models;
@@ -13,15 +12,13 @@ public class BookingService(
     IBookingRepository bookingRepository,
     ITimeSlotService timeSlotService,
     ICaregiverDailyScheduleService caregiverDailyScheduleService,
-    IUserService userService,
-    IAppDbContext appDbContext
+    IUserService userService
 ) : IBookingService
 {
     private readonly IBookingRepository _bookingRepository = bookingRepository;
     private readonly ITimeSlotService _timeSlotService = timeSlotService;
     private readonly ICaregiverDailyScheduleService _caregiverDailyScheduleService =
         caregiverDailyScheduleService;
-    private readonly IAppDbContext _appDbContext = appDbContext;
 
     private readonly IUserService _userService = userService;
 
@@ -46,12 +43,10 @@ public class BookingService(
             Comment = dto.Comment ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             Date = dto.Date,
-            CaregiverDailyScheduleId = dto.CaregiverDailyScheduleId,
-
             TimeSlot = timeslot,
             Patient = patient,
+            CaregiverDailyScheduleId = schedule.Id,
             DailySchedule = schedule,
-
         };
 
         return await _bookingRepository.CreateAsync(booking);
@@ -118,85 +113,5 @@ public class BookingService(
                     End = b.TimeSlot.End,
                 }),
         ];
-    }
-
-    public async Task<List<TimeSlotAvailabilityDto>> GetAvailableTimeSlotsAsync(DateOnly selectedDate, CancellationToken ct)
-    {
-        var slots = new (TimeOnly Start, TimeOnly End)[]
-        {
-        (new TimeOnly(8,0),  new TimeOnly(8,30)),
-        (new TimeOnly(8,30), new TimeOnly(9,0)),
-        (new TimeOnly(9,0),  new TimeOnly(9,30)),
-        (new TimeOnly(9,30), new TimeOnly(10,0)),
-        (new TimeOnly(10,0), new TimeOnly(10,30)),
-        (new TimeOnly(10,30),new TimeOnly(11,0)),
-        (new TimeOnly(11,0), new TimeOnly(11,30)),
-        (new TimeOnly(11,30),new TimeOnly(12,0)),
-        (new TimeOnly(12,0), new TimeOnly(12,30)),
-        (new TimeOnly(12,30),new TimeOnly(13,0)),
-        (new TimeOnly(13,0), new TimeOnly(13,30)),
-        (new TimeOnly(13,30),new TimeOnly(14,0)),
-        (new TimeOnly(14,0), new TimeOnly(14,30)),
-        (new TimeOnly(14,30),new TimeOnly(15,0)),
-        (new TimeOnly(15,0), new TimeOnly(15,30)),
-        (new TimeOnly(15,30),new TimeOnly(16,0)),
-        };
-
-        var bookings = await _appDbContext.Bookings
-    .AsNoTracking()
-    .Where(b => b.Date == selectedDate)
-    .Select(b => new
-    {
-        b.TimeSlot.Start,
-        b.TimeSlot.End,
-        b.CaregiverDailyScheduleId
-    })
-    .ToListAsync(ct);
-
-        var dayStart = selectedDate.ToDateTime(TimeOnly.MinValue);
-        var dayEnd = dayStart.AddDays(1);
-
-        var schedules = await _appDbContext.CaregiverDailySchedules
-            .AsNoTracking()
-            .Include(s => s.CaregiverStatus)
-            .Where(s => s.StartTime >= dayStart && s.StartTime < dayEnd)
-            .Where(s => s.CaregiverStatus.Status == "AVAILABLE")
-            .ToListAsync(ct);
-
-        var result = new List<TimeSlotAvailabilityDto>(slots.Length);
-
-        foreach (var (Start, End) in slots)
-        {
-            var slotStartDt = selectedDate.ToDateTime(Start);
-            var slotEndDt = selectedDate.ToDateTime(End);
-
-            var candidates = schedules
-                .Where(s => s.StartTime <= slotStartDt && s.EndTime >= slotEndDt)
-                .Select(s => s.Id)
-                .ToList();
-
-            var bookedScheduleIds = bookings
-                .Where(b => b.Start == Start && b.End == End)
-                .Select(b => b.CaregiverDailyScheduleId)
-                .ToHashSet();
-
-            var freeScheduleId = candidates.FirstOrDefault(id => !bookedScheduleIds.Contains(id));
-
-            var startStr = $"{Start:HH\\:mm}";
-            var endStr = $"{End:HH\\:mm}";
-
-            var isAvailable = freeScheduleId != Guid.Empty;
-
-            result.Add(new TimeSlotAvailabilityDto
-            {
-                Id = $"{startStr}-{endStr}",
-                Start = startStr,
-                End = endStr,
-                IsAvailable = isAvailable,
-                ScheduleId = isAvailable ? freeScheduleId : null
-            });
-        }
-
-        return result;
     }
 }
