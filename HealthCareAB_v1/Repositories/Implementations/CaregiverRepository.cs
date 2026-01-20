@@ -68,6 +68,7 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
     {
         return await _context
             .Bookings.Include(b => b.DailySchedule)
+            .Include(b => b.TimeSlot)
             .FirstOrDefaultAsync(b =>
                 b.PatientId == request.PatientId
                 && b.TimeSlotId == request.TimeSlotId
