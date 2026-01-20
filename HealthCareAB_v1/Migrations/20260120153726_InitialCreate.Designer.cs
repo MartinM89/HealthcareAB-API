@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HealthCareAB_v1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260113163920_AddedCaregiverIdAndCaregiverStatusId")]
-    partial class AddedCaregiverIdAndCaregiverStatusId
+    [Migration("20260120153726_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,7 @@ namespace HealthCareAB_v1.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CaregiverDailyScheduleId")
+                    b.Property<Guid>("CaregiverDailyScheduleId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Comment")
@@ -44,7 +44,7 @@ namespace HealthCareAB_v1.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<Guid>("PatientUserId")
+                    b.Property<Guid>("PatientId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("TimeSlotId")
@@ -54,7 +54,7 @@ namespace HealthCareAB_v1.Migrations
 
                     b.HasIndex("CaregiverDailyScheduleId");
 
-                    b.HasIndex("PatientUserId");
+                    b.HasIndex("PatientId");
 
                     b.HasIndex("TimeSlotId");
 
@@ -215,13 +215,15 @@ namespace HealthCareAB_v1.Migrations
 
             modelBuilder.Entity("HealthCareAB_v1.Models.Booking", b =>
                 {
-                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", null)
+                    b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", "DailySchedule")
                         .WithMany("Bookings")
-                        .HasForeignKey("CaregiverDailyScheduleId");
+                        .HasForeignKey("CaregiverDailyScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HealthCareAB_v1.Models.Patient", "Patient")
                         .WithMany("Bookings")
-                        .HasForeignKey("PatientUserId")
+                        .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -230,6 +232,8 @@ namespace HealthCareAB_v1.Migrations
                         .HasForeignKey("TimeSlotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("DailySchedule");
 
                     b.Navigation("Patient");
 
@@ -250,7 +254,7 @@ namespace HealthCareAB_v1.Migrations
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>
                 {
                     b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
-                        .WithMany()
+                        .WithMany("DailySchedules")
                         .HasForeignKey("CaregiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -286,6 +290,11 @@ namespace HealthCareAB_v1.Migrations
                         .IsRequired();
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HealthCareAB_v1.Models.Caregiver", b =>
+                {
+                    b.Navigation("DailySchedules");
                 });
 
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>

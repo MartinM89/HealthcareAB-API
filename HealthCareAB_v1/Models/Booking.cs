@@ -8,14 +8,16 @@ public class Booking
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateOnly Date { get; set; }
-
-    // public string UserId { get; set; } = string.Empty;
+    public Guid CaregiverDailyScheduleId { get; set; }
+    public Guid PatientId { get; set; }
+    public Guid TimeSlotId { get; set; }
 
     [JsonIgnore]
     public TimeSlot TimeSlot { get; set; } = null!;
 
     [JsonIgnore]
     public Patient Patient { get; set; } = null!;
-    public Guid CaregiverDailyScheduleId { get; set; }
+
+    [JsonIgnore]
     public CaregiverDailySchedule DailySchedule { get; set; } = null!;
 }

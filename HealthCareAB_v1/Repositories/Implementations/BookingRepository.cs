@@ -1,12 +1,25 @@
+using System.Diagnostics.CodeAnalysis;
 using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Repositories.Implementations;
 
+[ExcludeFromCodeCoverage]
 public class BookingRepository(AppDbContext context) : IBookingRepository
 {
     private readonly AppDbContext _context = context;
+
+    // public async Task<CaregiverDailySchedule> GetCaregiverScheduleAsync() { }
+
+    public async Task<Caregiver?> GetCaregiverByIdAsync(Guid caregiverId)
+    {
+        var caregiver = await _context.Caregivers.FirstOrDefaultAsync(c =>
+            c.User.Id == caregiverId
+        );
+
+        return caregiver;
+    }
 
     public async Task<Booking> CreateAsync(Booking booking)
     {
@@ -18,7 +31,7 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
     public Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken ct) =>
         _context
             .Bookings.Include(b => b.Patient)
-            .ThenInclude(p => p.User)
+                .ThenInclude(p => p.User)
             .FirstOrDefaultAsync(b => b.Id == bookingId, ct);
 
     public async Task DeleteAsync(Booking booking, CancellationToken ct)

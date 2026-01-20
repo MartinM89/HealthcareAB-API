@@ -21,7 +21,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
         return User?.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 
-    [HttpPost]
+    [HttpPost("create-booking")]
     public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
     {
         var userId = GetUserId();
