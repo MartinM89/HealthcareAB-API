@@ -309,7 +309,7 @@ public class CaregiverServiceTests
         var statusId = Guid.NewGuid();
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = scheduleId,
@@ -397,7 +397,7 @@ public class CaregiverServiceTests
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
         // Act & Assert
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = Guid.NewGuid(),
@@ -419,7 +419,7 @@ public class CaregiverServiceTests
         Assert.Equal($"Patient with ID {bookingRequest.PatientId} not found", exception.Message);
 
         _caregiverRepoMock.Verify(
-            repo => repo.GetCaregiversDailyScheduleAsync(It.IsAny<CaregiverCreateBookingDto>()),
+            repo => repo.GetCaregiversDailyScheduleAsync(It.IsAny<CreateBookingDto>()),
             Times.Never
         );
         _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
@@ -436,7 +436,7 @@ public class CaregiverServiceTests
 
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = scheduleId,
@@ -477,7 +477,7 @@ public class CaregiverServiceTests
         Assert.Equal($"Schedule with ID {scheduleId} not found", exception.Message);
 
         _caregiverRepoMock.Verify(
-            repo => repo.GetTimeSlotAsync(It.IsAny<CaregiverCreateBookingDto>()),
+            repo => repo.GetTimeSlotAsync(It.IsAny<CreateBookingDto>()),
             Times.Never
         );
         _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
