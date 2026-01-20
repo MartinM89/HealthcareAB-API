@@ -31,12 +31,11 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
             throw new ArgumentException("Date range cannot exceed 30 days");
         }
 
-        var schedules =
-            await _caregiverRepository.GetSchedulesWithBookingsAsync(
-                caregiverId,
-                startDate,
-                endDate
-            ) ?? throw new NotFoundException($"Caregiver with ID {caregiverId} not found");
+        var schedules = await _caregiverRepository.GetSchedulesWithBookingsAsync(
+            caregiverId,
+            startDate,
+            endDate
+        );
 
         return new ScheduleOverviewDto
         {
@@ -182,6 +181,14 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
             throw new UnauthorizedAccessException(
                 "You can only cancel bookings on your own schedules"
             );
+        }
+
+        var now = DateTime.UtcNow;
+        var bookingDateTime = booking.Date.ToDateTime(booking.TimeSlot.Start);
+
+        if (bookingDateTime < now)
+        {
+            throw new ValidationException("You can't cancel bookings in the past");
         }
 
         await _caregiverRepository.RemoveBookingAsync(booking);
