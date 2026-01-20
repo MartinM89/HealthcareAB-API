@@ -8,5 +8,8 @@ public interface IBookingService
 {
     Task<Booking> CreateAsync(string userId, CreateBookingDto dto);
     Task<CancelBookingResult> CancelAsync(Guid bookingId, Guid patientId, CancellationToken ct);
-    Task<List<BookingResponseDto>> GetByPatientIdAsync(Guid patientId, CancellationToken ct);
+    Task<(IEnumerable<Booking>, IEnumerable<Booking>)> GetByPatientIdAsync(
+        Guid patientId,
+        CancellationToken ct
+    );
 }

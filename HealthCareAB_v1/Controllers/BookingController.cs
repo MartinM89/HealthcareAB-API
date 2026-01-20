@@ -64,15 +64,16 @@ public class BookingController(IBookingService bookingService) : ControllerBase
 
     [Authorize(Roles = Roles.Patient)]
     [HttpGet("mybookings")]
-    public async Task<ActionResult<List<BookingResponseDto>>> GetByPatientId(CancellationToken ct)
+    public async Task<ActionResult<object>> GetByPatientId(CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
         {
             return Unauthorized();
         }
 
-        var result = await _bookingService.GetByPatientIdAsync(patientId, ct);
-        return Ok(result);
+        var (upcoming, past) = await _bookingService.GetByPatientIdAsync(patientId, ct);
+
+        return Ok(new { Upcoming = upcoming.Select(MapToDto), Past = past.Select(MapToDto) });
     }
 
     private static BookingResponseDto MapToDto(Booking booking)
