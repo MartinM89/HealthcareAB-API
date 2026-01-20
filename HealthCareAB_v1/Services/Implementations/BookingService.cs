@@ -4,7 +4,6 @@ using HealthCareAB_v1.Models;
 using HealthCareAB_v1.Repositories.Interfaces;
 using HealthCareAB_v1.Services.Interfaces;
 using HealthCareAB_v1.Services.Results;
-using Microsoft.EntityFrameworkCore;
 
 namespace HealthCareAB_v1.Services.Implementations;
 
@@ -74,7 +73,7 @@ public class BookingService(
         return CancelBookingResult.Cancelled;
     }
 
-    public async Task<List<BookingResponseDto>> GetByPatientIdAsync(
+    public async Task<(IEnumerable<Booking>, IEnumerable<Booking>)> GetByPatientIdAsync(
         Guid patientId,
         CancellationToken ct
     )
@@ -99,19 +98,21 @@ public class BookingService(
             .OrderByDescending(b => b.Date)
             .ThenByDescending(b => b.TimeSlot.Start);
 
-        return
-        [
-            .. upcoming
-                .Concat(past)
-                .Select(b => new BookingResponseDto
-                {
-                    Id = b.Id,
-                    Comment = b.Comment,
-                    CreatedAt = b.CreatedAt,
-                    Date = b.Date,
-                    Start = b.TimeSlot.Start,
-                    End = b.TimeSlot.End,
-                }),
-        ];
+        return (upcoming, past);
+
+        // return
+        // [
+        //     .. upcoming
+        //         .Concat(past)
+        //         .Select(b => new BookingResponseDto
+        //         {
+        //             Id = b.Id,
+        //             Comment = b.Comment,
+        //             CreatedAt = b.CreatedAt,
+        //             Date = b.Date,
+        //             Start = b.TimeSlot.Start,
+        //             End = b.TimeSlot.End,
+        //         }),
+        // ];
     }
 }
