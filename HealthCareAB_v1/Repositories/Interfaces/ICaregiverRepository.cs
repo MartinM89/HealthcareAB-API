@@ -11,12 +11,13 @@ public interface ICaregiverRepository
         DateTime startDate,
         DateTime endDate
     );
-    Task<Patient?> GetPatientByIdAsync(CaregiverCreateBookingDto request);
-    Task<CaregiverDailySchedule?> GetCaregiversDailyScheduleAsync(
-        CaregiverCreateBookingDto request
-    );
+    Task<Patient?> GetPatientByIdAsync(CreateBookingDto request);
+    Task<CaregiverDailySchedule?> GetCaregiversDailyScheduleAsync(CreateBookingDto request);
 
-    Task<TimeSlot?> GetTimeSlotAsync(CaregiverCreateBookingDto request);
+    Task<TimeSlot?> GetTimeSlotAsync(CreateBookingDto request);
 
     Task AddBookingAsync(Booking booking);
+    Task<Booking?> GetBookingAsync(CancelBookingDto request);
+
+    Task RemoveBookingAsync(Booking booking);
 }
