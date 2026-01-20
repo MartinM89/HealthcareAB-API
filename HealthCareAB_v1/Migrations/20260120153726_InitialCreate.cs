@@ -1,40 +1,15 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace HealthCareAB_v1.Migrations;
 
-[ExcludeFromCodeCoverage]
 /// <inheritdoc />
 public partial class InitialCreate : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.CreateTable(
-            name: "Caregivers",
-            columns: table => new
-            {
-                Id = table.Column<Guid>(type: "uuid", nullable: false),
-                Username = table.Column<string>(
-                    type: "character varying(50)",
-                    maxLength: 50,
-                    nullable: false
-                ),
-                PasswordHash = table.Column<string>(type: "text", nullable: false),
-                Email = table.Column<string>(type: "text", nullable: false),
-                FirstName = table.Column<string>(type: "text", nullable: false),
-                LastName = table.Column<string>(type: "text", nullable: false),
-                PhoneNumber = table.Column<string>(type: "text", nullable: false),
-                Roles = table.Column<List<string>>(type: "jsonb", nullable: false),
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Caregivers", x => x.Id);
-            }
-        );
-
         migrationBuilder.CreateTable(
             name: "CaregiverStatuses",
             columns: table => new
@@ -49,14 +24,24 @@ public partial class InitialCreate : Migration
         );
 
         migrationBuilder.CreateTable(
-            name: "Patients",
+            name: "TimeSlots",
             columns: table => new
             {
                 Id = table.Column<Guid>(type: "uuid", nullable: false),
-                SocialSecurityNumber = table.Column<string>(type: "text", nullable: false),
-                Street = table.Column<string>(type: "text", nullable: false),
-                City = table.Column<string>(type: "text", nullable: false),
-                ZipCode = table.Column<string>(type: "text", nullable: false),
+                Start = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                End = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_TimeSlots", x => x.Id);
+            }
+        );
+
+        migrationBuilder.CreateTable(
+            name: "Users",
+            columns: table => new
+            {
+                Id = table.Column<Guid>(type: "uuid", nullable: false),
                 Username = table.Column<string>(
                     type: "character varying(50)",
                     maxLength: 50,
@@ -71,21 +56,46 @@ public partial class InitialCreate : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_Patients", x => x.Id);
+                table.PrimaryKey("PK_Users", x => x.Id);
             }
         );
 
         migrationBuilder.CreateTable(
-            name: "TimeSlots",
+            name: "Caregivers",
+            columns: table => new { UserId = table.Column<Guid>(type: "uuid", nullable: false) },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Caregivers", x => x.UserId);
+                table.ForeignKey(
+                    name: "FK_Caregivers_Users_UserId",
+                    column: x => x.UserId,
+                    principalTable: "Users",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Cascade
+                );
+            }
+        );
+
+        migrationBuilder.CreateTable(
+            name: "Patients",
             columns: table => new
             {
-                Id = table.Column<Guid>(type: "uuid", nullable: false),
-                Start = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                TimeLength = table.Column<double>(type: "double precision", nullable: false),
+                UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                SocialSecurityNumber = table.Column<string>(type: "text", nullable: false),
+                Street = table.Column<string>(type: "text", nullable: false),
+                City = table.Column<string>(type: "text", nullable: false),
+                ZipCode = table.Column<string>(type: "text", nullable: false),
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_TimeSlots", x => x.Id);
+                table.PrimaryKey("PK_Patients", x => x.UserId);
+                table.ForeignKey(
+                    name: "FK_Patients_Users_UserId",
+                    column: x => x.UserId,
+                    principalTable: "Users",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Cascade
+                );
             }
         );
 
@@ -94,8 +104,11 @@ public partial class InitialCreate : Migration
             columns: table => new
             {
                 Id = table.Column<Guid>(type: "uuid", nullable: false),
-                Start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                End = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                StartTime = table.Column<DateTime>(
+                    type: "timestamp with time zone",
+                    nullable: false
+                ),
+                EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 CaregiverId = table.Column<Guid>(type: "uuid", nullable: false),
                 CaregiverStatusId = table.Column<Guid>(type: "uuid", nullable: false),
             },
@@ -113,7 +126,7 @@ public partial class InitialCreate : Migration
                     name: "FK_CaregiverDailySchedules_Caregivers_CaregiverId",
                     column: x => x.CaregiverId,
                     principalTable: "Caregivers",
-                    principalColumn: "Id",
+                    principalColumn: "UserId",
                     onDelete: ReferentialAction.Cascade
                 );
             }
@@ -137,7 +150,7 @@ public partial class InitialCreate : Migration
                     name: "FK_Review_Patients_Id",
                     column: x => x.Id,
                     principalTable: "Patients",
-                    principalColumn: "Id",
+                    principalColumn: "UserId",
                     onDelete: ReferentialAction.Cascade
                 );
             }
@@ -148,7 +161,7 @@ public partial class InitialCreate : Migration
             columns: table => new
             {
                 Id = table.Column<Guid>(type: "uuid", nullable: false),
-                Comment = table.Column<string>(type: "text", nullable: true),
+                Comment = table.Column<string>(type: "text", nullable: false),
                 CreatedAt = table.Column<DateTime>(
                     type: "timestamp with time zone",
                     nullable: false
@@ -156,14 +169,14 @@ public partial class InitialCreate : Migration
                 Date = table.Column<DateOnly>(type: "date", nullable: false),
                 TimeSlotId = table.Column<Guid>(type: "uuid", nullable: false),
                 PatientId = table.Column<Guid>(type: "uuid", nullable: false),
-                DailyScheduleId = table.Column<Guid>(type: "uuid", nullable: false),
+                CaregiverDailyScheduleId = table.Column<Guid>(type: "uuid", nullable: false),
             },
             constraints: table =>
             {
                 table.PrimaryKey("PK_Bookings", x => x.Id);
                 table.ForeignKey(
-                    name: "FK_Bookings_CaregiverDailySchedules_DailyScheduleId",
-                    column: x => x.DailyScheduleId,
+                    name: "FK_Bookings_CaregiverDailySchedules_CaregiverDailyScheduleId",
+                    column: x => x.CaregiverDailyScheduleId,
                     principalTable: "CaregiverDailySchedules",
                     principalColumn: "Id",
                     onDelete: ReferentialAction.Cascade
@@ -172,7 +185,7 @@ public partial class InitialCreate : Migration
                     name: "FK_Bookings_Patients_PatientId",
                     column: x => x.PatientId,
                     principalTable: "Patients",
-                    principalColumn: "Id",
+                    principalColumn: "UserId",
                     onDelete: ReferentialAction.Cascade
                 );
                 table.ForeignKey(
@@ -186,9 +199,9 @@ public partial class InitialCreate : Migration
         );
 
         migrationBuilder.CreateIndex(
-            name: "IX_Bookings_DailyScheduleId",
+            name: "IX_Bookings_CaregiverDailyScheduleId",
             table: "Bookings",
-            column: "DailyScheduleId"
+            column: "CaregiverDailyScheduleId"
         );
 
         migrationBuilder.CreateIndex(
@@ -232,5 +245,7 @@ public partial class InitialCreate : Migration
         migrationBuilder.DropTable(name: "CaregiverStatuses");
 
         migrationBuilder.DropTable(name: "Caregivers");
+
+        migrationBuilder.DropTable(name: "Users");
     }
 }

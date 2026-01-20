@@ -8,8 +8,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace HealthCareAB_v1.Migrations;
-
+namespace HealthCareAB_v1.Migrations
+{
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
@@ -38,9 +38,6 @@ namespace HealthCareAB_v1.Migrations;
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("DailyScheduleId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
@@ -52,7 +49,7 @@ namespace HealthCareAB_v1.Migrations;
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DailyScheduleId");
+                    b.HasIndex("CaregiverDailyScheduleId");
 
                     b.HasIndex("PatientId");
 
@@ -217,7 +214,7 @@ namespace HealthCareAB_v1.Migrations;
                 {
                     b.HasOne("HealthCareAB_v1.Models.CaregiverDailySchedule", "DailySchedule")
                         .WithMany("Bookings")
-                        .HasForeignKey("DailyScheduleId")
+                        .HasForeignKey("CaregiverDailyScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -254,14 +251,11 @@ namespace HealthCareAB_v1.Migrations;
             modelBuilder.Entity("HealthCareAB_v1.Models.CaregiverDailySchedule", b =>
                 {
                     b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
-                        .WithMany()
+                        .WithMany("DailySchedules")
                         .HasForeignKey("CaregiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HealthCareAB_v1.Models.Caregiver", "Caregiver")
-                        .WithMany("DailySchedules")
-                        .HasForeignKey("CaregiverUserId");
                     b.HasOne("HealthCareAB_v1.Models.CaregiverStatus", "CaregiverStatus")
                         .WithMany("CaregiverDailySchedules")
                         .HasForeignKey("CaregiverStatusId")
@@ -331,3 +325,4 @@ namespace HealthCareAB_v1.Migrations;
 #pragma warning restore 612, 618
         }
     }
+}

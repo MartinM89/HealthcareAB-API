@@ -22,7 +22,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     }
 
     [HttpPost("create-booking")]
-    public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
     {
         var userId = GetUserId();
         if (userId == null)

@@ -14,4 +14,23 @@ public class TimeSlotRepository(IAppDbContext context) : ITimeSlotRepository
     {
         return await _context.TimeSlots.FirstOrDefaultAsync(t => t.Id == TimeSlotId);
     }
+
+    public async Task<ICollection<TimeSlot>> GetAllAsync(CancellationToken ct)
+    {
+        return await _context.TimeSlots.ToListAsync(ct);
+    }
+
+    public async Task<ICollection<CaregiverDailySchedule>> GetByDateAsync(
+        DateOnly selectedDate,
+        DateTime dateTime,
+        CancellationToken ct
+    )
+    {
+        return await _context
+            .CaregiverDailySchedules.Include(s => s.CaregiverStatus)
+            .Include(s => s.Bookings.Where(b => b.Date == selectedDate))
+            .Where(s => s.StartTime >= dateTime)
+            .Where(s => s.CaregiverStatus.Status == "AVAILABLE")
+            .ToListAsync(ct);
+    }
 }

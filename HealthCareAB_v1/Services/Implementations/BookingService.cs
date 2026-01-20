@@ -45,6 +45,7 @@ public class BookingService(
             Date = dto.Date,
             TimeSlot = timeslot,
             Patient = patient,
+            CaregiverDailyScheduleId = schedule.Id,
             DailySchedule = schedule,
         };
 
