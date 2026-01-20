@@ -7,6 +7,5 @@ public interface IBookingRepository
     Task<Booking> CreateAsync(Booking booking);
     Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken ct);
     Task DeleteAsync(Booking booking, CancellationToken ct);
-
     Task<List<Booking>> GetByPatientIdAsync(Guid patientId, CancellationToken ct);
 }
