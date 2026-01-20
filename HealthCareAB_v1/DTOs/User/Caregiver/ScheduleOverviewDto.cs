@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
 [ExcludeFromCodeCoverage]
-public class CaregiverScheduleOverviewDto
+public class ScheduleOverviewDto
 {
     public Guid CaregiverId { get; set; }
     public DateTime StartDate { get; set; }

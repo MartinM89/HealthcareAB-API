@@ -23,7 +23,7 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
     }
 
     [HttpPost("create-booking")]
-    public async Task<IActionResult> CreateBooking([FromBody] CaregiverCreateBookingDto request)
+    public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto request)
     {
         try
         {
@@ -96,6 +96,48 @@ public class CaregiverController(ICaregiverService caregiverService) : Controlle
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(400, new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("cancel-booking")]
+    public async Task<IActionResult> CancelBooking([FromBody] CancelBookingDto request)
+    {
+        try
+        {
+            var caregiverId = GetUserId();
+
+            if (caregiverId == null)
+            {
+                return Unauthorized("You must be logged in as a caregiver");
+            }
+
+            var canceledBooking = await _caregiverService.CancelBookingForPatientAsync(
+                Guid.Parse(caregiverId),
+                request
+            );
+
+            return Ok(
+                new
+                {
+                    message = "Booking canceled successfully",
+                    bookingId = canceledBooking.Id,
+                    patientId = canceledBooking.PatientId,
+                    date = canceledBooking.Date,
+                    timeSlotId = canceledBooking.TimeSlotId,
+                }
+            );
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { ex.Message });
         }
         catch (Exception ex)
         {

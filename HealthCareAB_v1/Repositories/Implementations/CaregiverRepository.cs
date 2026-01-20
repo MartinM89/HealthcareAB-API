@@ -38,13 +38,13 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
         return caregiversSchedule;
     }
 
-    public async Task<Patient?> GetPatientByIdAsync(CaregiverCreateBookingDto request)
+    public async Task<Patient?> GetPatientByIdAsync(CreateBookingDto request)
     {
         return await _context.Patients.FirstOrDefaultAsync(p => p.UserId == request.PatientId);
     }
 
     public async Task<CaregiverDailySchedule?> GetCaregiversDailyScheduleAsync(
-        CaregiverCreateBookingDto request
+        CreateBookingDto request
     )
     {
         return await _context
@@ -53,7 +53,7 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
             .FirstOrDefaultAsync(s => s.Id == request.CaregiverDailyScheduleId);
     }
 
-    public async Task<TimeSlot?> GetTimeSlotAsync(CaregiverCreateBookingDto request)
+    public async Task<TimeSlot?> GetTimeSlotAsync(CreateBookingDto request)
     {
         return await _context.TimeSlots.FirstOrDefaultAsync(ts => ts.Id == request.TimeSlotId);
     }
@@ -61,6 +61,25 @@ public class CaregiverRepository(IAppDbContext context) : ICaregiverRepository
     public async Task AddBookingAsync(Booking booking)
     {
         _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Booking?> GetBookingAsync(CancelBookingDto request)
+    {
+        return await _context
+            .Bookings.Include(b => b.DailySchedule)
+            .Include(b => b.TimeSlot)
+            .FirstOrDefaultAsync(b =>
+                b.PatientId == request.PatientId
+                && b.TimeSlotId == request.TimeSlotId
+                && b.Date == request.Date
+                && b.CaregiverDailyScheduleId == request.DailyScheduleId
+            );
+    }
+
+    public async Task RemoveBookingAsync(Booking booking)
+    {
+        _context.Bookings.Remove(booking);
         await _context.SaveChangesAsync();
     }
 }

@@ -10,7 +10,7 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
 {
     private readonly ICaregiverRepository _caregiverRepository = caregiverRepository;
 
-    public async Task<CaregiverScheduleOverviewDto> GetScheduleOverviewAsync(
+    public async Task<ScheduleOverviewDto> GetScheduleOverviewAsync(
         Guid caregiverId,
         DateTime startDate,
         DateTime endDate
@@ -31,14 +31,13 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
             throw new ArgumentException("Date range cannot exceed 30 days");
         }
 
-        var schedules =
-            await _caregiverRepository.GetSchedulesWithBookingsAsync(
-                caregiverId,
-                startDate,
-                endDate
-            ) ?? throw new NotFoundException($"Caregiver with ID {caregiverId} not found");
+        var schedules = await _caregiverRepository.GetSchedulesWithBookingsAsync(
+            caregiverId,
+            startDate,
+            endDate
+        );
 
-        return new CaregiverScheduleOverviewDto
+        return new ScheduleOverviewDto
         {
             CaregiverId = caregiverId,
             StartDate = startDate,
@@ -82,7 +81,7 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
         };
     }
 
-    public async Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
+    public async Task<ScheduleOverviewDto> GetUpcomingSchedulesAsync(
         Guid caregiverId,
         int daysAhead = 30
     )
@@ -95,7 +94,7 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
 
     public async Task<Booking> CreateBookingForPatientAsync(
         Guid caregiverId,
-        CaregiverCreateBookingDto request
+        CreateBookingDto request
     )
     {
         var patient =
@@ -159,6 +158,40 @@ public class CaregiverService(ICaregiverRepository caregiverRepository) : ICareg
         };
 
         await _caregiverRepository.AddBookingAsync(booking);
+
+        return booking;
+    }
+
+    public async Task<Booking> CancelBookingForPatientAsync(
+        Guid caregiverId,
+        CancelBookingDto request
+    )
+    {
+        if (caregiverId == Guid.Empty)
+        {
+            throw new ArgumentException("Caregiver ID cannot be empty");
+        }
+
+        var booking =
+            await _caregiverRepository.GetBookingAsync(request)
+            ?? throw new NotFoundException($"Booking for canceling not found");
+
+        if (booking.DailySchedule.CaregiverId != caregiverId)
+        {
+            throw new UnauthorizedAccessException(
+                "You can only cancel bookings on your own schedules"
+            );
+        }
+
+        var now = DateTime.UtcNow;
+        var bookingDateTime = booking.Date.ToDateTime(booking.TimeSlot.Start);
+
+        if (bookingDateTime < now)
+        {
+            throw new ValidationException("You can't cancel bookings in the past");
+        }
+
+        await _caregiverRepository.RemoveBookingAsync(booking);
 
         return booking;
     }

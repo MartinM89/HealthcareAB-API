@@ -309,7 +309,7 @@ public class CaregiverServiceTests
         var statusId = Guid.NewGuid();
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = scheduleId,
@@ -397,7 +397,7 @@ public class CaregiverServiceTests
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
         // Act & Assert
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = Guid.NewGuid(),
@@ -419,7 +419,7 @@ public class CaregiverServiceTests
         Assert.Equal($"Patient with ID {bookingRequest.PatientId} not found", exception.Message);
 
         _caregiverRepoMock.Verify(
-            repo => repo.GetCaregiversDailyScheduleAsync(It.IsAny<CaregiverCreateBookingDto>()),
+            repo => repo.GetCaregiversDailyScheduleAsync(It.IsAny<CreateBookingDto>()),
             Times.Never
         );
         _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
@@ -436,7 +436,7 @@ public class CaregiverServiceTests
 
         var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
 
-        var bookingRequest = new CaregiverCreateBookingDto
+        var bookingRequest = new CreateBookingDto
         {
             PatientId = patientId,
             CaregiverDailyScheduleId = scheduleId,
@@ -477,10 +477,411 @@ public class CaregiverServiceTests
         Assert.Equal($"Schedule with ID {scheduleId} not found", exception.Message);
 
         _caregiverRepoMock.Verify(
-            repo => repo.GetTimeSlotAsync(It.IsAny<CaregiverCreateBookingDto>()),
+            repo => repo.GetTimeSlotAsync(It.IsAny<CreateBookingDto>()),
             Times.Never
         );
         _caregiverRepoMock.Verify(repo => repo.AddBookingAsync(It.IsAny<Booking>()), Times.Never);
     }
     #endregion
+
+    #region CancelBookingForPatientAsync method
+    [Fact]
+    public async Task CancelBookingForPatientAsync_WhenValidRequest_CancelsAndReturnsCanceledBooking()
+    {
+        // Arrange
+        var caregiverId = Guid.NewGuid();
+        var patientId = Guid.NewGuid();
+        var scheduleId = Guid.NewGuid();
+        var timeSlotId = Guid.NewGuid();
+        var bookingId = Guid.NewGuid();
+        var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
+
+        var cancelRequest = new CancelBookingDto
+        {
+            PatientId = patientId,
+            DailyScheduleId = scheduleId,
+            TimeSlotId = timeSlotId,
+            Date = bookingDate,
+        };
+
+        var dailySchedule = new CaregiverDailySchedule
+        {
+            Id = scheduleId,
+            CaregiverId = caregiverId,
+            StartTime = bookingDate.ToDateTime(new TimeOnly(8, 0)).ToUniversalTime(),
+            EndTime = bookingDate.ToDateTime(new TimeOnly(16, 0)).ToUniversalTime(),
+        };
+
+        var timeSlot = new TimeSlot
+        {
+            Id = timeSlotId,
+            Start = new TimeOnly(8, 0),
+            End = new TimeOnly(8, 30),
+            Bookings = [],
+        };
+
+        var booking = new Booking
+        {
+            Id = bookingId,
+            PatientId = patientId,
+            CaregiverDailyScheduleId = scheduleId,
+            TimeSlotId = timeSlotId,
+            Date = bookingDate,
+            Comment = "Scheduled appointment",
+            CreatedAt = DateTime.UtcNow.AddDays(-2),
+            DailySchedule = dailySchedule,
+            TimeSlot = timeSlot,
+        };
+
+        _caregiverRepoMock.Setup(repo => repo.GetBookingAsync(cancelRequest)).ReturnsAsync(booking);
+
+        _caregiverRepoMock
+            .Setup(repo => repo.RemoveBookingAsync(booking))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _caregiverService.CancelBookingForPatientAsync(
+            caregiverId,
+            cancelRequest
+        );
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(booking.Id, result.Id);
+        Assert.Equal(patientId, result.PatientId);
+        Assert.Equal(scheduleId, result.CaregiverDailyScheduleId);
+        Assert.Equal(timeSlotId, result.TimeSlotId);
+        Assert.Equal(bookingDate, result.Date);
+
+        _caregiverRepoMock.Verify(repo => repo.GetBookingAsync(cancelRequest), Times.Once);
+        _caregiverRepoMock.Verify(repo => repo.RemoveBookingAsync(booking), Times.Once);
+    }
+
+    [Fact]
+    public async Task CancelBookingForPatientAsync_WhenCaregiverIdIsEmpty_ThrowsArgumentException()
+    {
+        // Arrange
+        var caregiverId = Guid.Empty;
+        var patientId = Guid.NewGuid();
+        var scheduleId = Guid.NewGuid();
+        var timeSlotId = Guid.NewGuid();
+        var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
+
+        var cancelRequest = new CancelBookingDto
+        {
+            PatientId = patientId,
+            DailyScheduleId = scheduleId,
+            TimeSlotId = timeSlotId,
+            Date = bookingDate,
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            async () =>
+                await _caregiverService.CancelBookingForPatientAsync(caregiverId, cancelRequest)
+        );
+
+        Assert.Equal("Caregiver ID cannot be empty", exception.Message);
+
+        _caregiverRepoMock.Verify(
+            repo => repo.GetBookingAsync(It.IsAny<CancelBookingDto>()),
+            Times.Never
+        );
+        _caregiverRepoMock.Verify(
+            repo => repo.RemoveBookingAsync(It.IsAny<Booking>()),
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task CancelBookingForPatientAsync_WhenBookingNotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+        var caregiverId = Guid.NewGuid();
+        var patientId = Guid.NewGuid();
+        var scheduleId = Guid.NewGuid();
+        var timeSlotId = Guid.NewGuid();
+        var bookingDate = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1));
+
+        var cancelRequest = new CancelBookingDto
+        {
+            PatientId = patientId,
+            DailyScheduleId = scheduleId,
+            TimeSlotId = timeSlotId,
+            Date = bookingDate,
+        };
+
+        _caregiverRepoMock
+            .Setup(repo => repo.GetBookingAsync(cancelRequest))
+            .ReturnsAsync(null as Booking);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<NotFoundException>(
+            async () =>
+                await _caregiverService.CancelBookingForPatientAsync(caregiverId, cancelRequest)
+        );
+
+        Assert.Equal("Booking for canceling not found", exception.Message);
+
+        _caregiverRepoMock.Verify(repo => repo.GetBookingAsync(cancelRequest), Times.Once);
+
+        _caregiverRepoMock.Verify(
+            repo => repo.RemoveBookingAsync(It.IsAny<Booking>()),
+            Times.Never
+        );
+    }
+
+    #endregion
+
+
+    #region GetScheduleOverviewAsync exception tests
+    [Fact]
+    public async Task GetScheduleOverviewAsync_ThrowsArgumentException_WhenCaregiverIdIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () =>
+                _caregiverService.GetScheduleOverviewAsync(
+                    Guid.Empty,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow.AddDays(1)
+                )
+        );
+    }
+
+    [Fact]
+    public async Task GetScheduleOverviewAsync_ThrowsArgumentException_WhenEndDateBeforeStartDate()
+    {
+        var caregiverId = Guid.NewGuid();
+        var startDate = DateTime.UtcNow;
+        var endDate = startDate.AddDays(-1);
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        );
+    }
+
+    [Fact]
+    public async Task GetScheduleOverviewAsync_ThrowsArgumentException_WhenDateRangeExceedsThirtyDays()
+    {
+        var caregiverId = Guid.NewGuid();
+        var startDate = DateTime.UtcNow;
+        var endDate = startDate.AddDays(31);
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _caregiverService.GetScheduleOverviewAsync(caregiverId, startDate, endDate)
+        );
+    }
+    #endregion
+
+    #region CreateBookingForPatientAsync exception tests
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsNotFoundException_WhenPatientNotFound()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto { PatientId = Guid.NewGuid() };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync((Patient)null);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsNotFoundException_WhenDailyScheduleNotFound()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto { PatientId = Guid.NewGuid() };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync((CaregiverDailySchedule)null);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsNotFoundException_WhenTimeSlotNotFound()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto { PatientId = Guid.NewGuid() };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync(
+                new CaregiverDailySchedule
+                {
+                    CaregiverId = caregiverId,
+                    CaregiverStatus = new CaregiverStatus { Status = CaregiverStatuses.Available },
+                    Bookings = [],
+                }
+            );
+        _caregiverRepoMock.Setup(r => r.GetTimeSlotAsync(request)).ReturnsAsync((TimeSlot)null);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsUnauthorizedAccessException_WhenCaregiverIdMismatch()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto { PatientId = Guid.NewGuid() };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync(
+                new CaregiverDailySchedule
+                {
+                    CaregiverId = Guid.NewGuid(),
+                    CaregiverStatus = new CaregiverStatus { Status = CaregiverStatuses.Available },
+                    Bookings = [],
+                }
+            );
+        _caregiverRepoMock
+            .Setup(r => r.GetTimeSlotAsync(request))
+            .ReturnsAsync(new TimeSlot { Start = new TimeOnly(8, 0), End = new TimeOnly(8, 30) });
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsInvalidOperationException_WhenScheduleNotAvailable()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto { PatientId = Guid.NewGuid() };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync(
+                new CaregiverDailySchedule
+                {
+                    CaregiverId = caregiverId,
+                    CaregiverStatus = new CaregiverStatus { Status = "UNAVAILABLE" },
+                    Bookings = [],
+                }
+            );
+        _caregiverRepoMock
+            .Setup(r => r.GetTimeSlotAsync(request))
+            .ReturnsAsync(new TimeSlot { Start = new TimeOnly(8, 0), End = new TimeOnly(8, 30) });
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsInvalidOperationException_WhenTimeSlotOutsideWorkingHours()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CreateBookingDto
+        {
+            PatientId = Guid.NewGuid(),
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSlotId = Guid.NewGuid(),
+        };
+        var schedule = new CaregiverDailySchedule
+        {
+            CaregiverId = caregiverId,
+            CaregiverStatus = new CaregiverStatus { Status = CaregiverStatuses.Available },
+            Bookings = [],
+            StartTime = DateTime.UtcNow.AddHours(1),
+            EndTime = DateTime.UtcNow.AddHours(2),
+        };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync(schedule);
+        _caregiverRepoMock
+            .Setup(r => r.GetTimeSlotAsync(request))
+            .ReturnsAsync(new TimeSlot { Start = new TimeOnly(0, 0), End = new TimeOnly(0, 30) });
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CreateBookingForPatientAsync_ThrowsInvalidOperationException_WhenTimeSlotAlreadyBooked()
+    {
+        var caregiverId = Guid.NewGuid();
+        var slotId = Guid.NewGuid();
+        var request = new CreateBookingDto
+        {
+            PatientId = Guid.NewGuid(),
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSlotId = slotId,
+        };
+        var schedule = new CaregiverDailySchedule
+        {
+            CaregiverId = caregiverId,
+            CaregiverStatus = new CaregiverStatus { Status = CaregiverStatuses.Available },
+            Bookings = [new Booking { TimeSlotId = slotId, Date = request.Date }],
+            StartTime = DateTime.UtcNow.AddHours(-1),
+            EndTime = DateTime.UtcNow.AddHours(2),
+        };
+        _caregiverRepoMock.Setup(r => r.GetPatientByIdAsync(request)).ReturnsAsync(new Patient());
+        _caregiverRepoMock
+            .Setup(r => r.GetCaregiversDailyScheduleAsync(request))
+            .ReturnsAsync(schedule);
+        _caregiverRepoMock
+            .Setup(r => r.GetTimeSlotAsync(request))
+            .ReturnsAsync(new TimeSlot { Start = new TimeOnly(8, 0), End = new TimeOnly(8, 30) });
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _caregiverService.CreateBookingForPatientAsync(caregiverId, request)
+        );
+    }
+    #endregion
+
+    #region CancelBookingForPatientAsync exception tests
+    [Fact]
+    public async Task CancelBookingForPatientAsync_ThrowsArgumentException_WhenCaregiverIdIsEmpty()
+    {
+        var request = new CancelBookingDto();
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _caregiverService.CancelBookingForPatientAsync(Guid.Empty, request)
+        );
+    }
+
+    [Fact]
+    public async Task CancelBookingForPatientAsync_ThrowsNotFoundException_WhenBookingNotFound()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CancelBookingDto();
+        _caregiverRepoMock.Setup(r => r.GetBookingAsync(request)).ReturnsAsync((Booking)null);
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _caregiverService.CancelBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CancelBookingForPatientAsync_ThrowsUnauthorizedAccessException_WhenCaregiverIdMismatch()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CancelBookingDto();
+        var booking = new Booking
+        {
+            DailySchedule = new CaregiverDailySchedule { CaregiverId = Guid.NewGuid() },
+            TimeSlot = new TimeSlot { Start = new TimeOnly(8, 0) },
+            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+        };
+        _caregiverRepoMock.Setup(r => r.GetBookingAsync(request)).ReturnsAsync(booking);
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _caregiverService.CancelBookingForPatientAsync(caregiverId, request)
+        );
+    }
+
+    [Fact]
+    public async Task CancelBookingForPatientAsync_ThrowsValidationException_WhenBookingInPast()
+    {
+        var caregiverId = Guid.NewGuid();
+        var request = new CancelBookingDto();
+        var booking = new Booking
+        {
+            DailySchedule = new CaregiverDailySchedule { CaregiverId = caregiverId },
+            TimeSlot = new TimeSlot { Start = new TimeOnly(8, 0) },
+            Date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+        };
+        _caregiverRepoMock.Setup(r => r.GetBookingAsync(request)).ReturnsAsync(booking);
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _caregiverService.CancelBookingForPatientAsync(caregiverId, request)
+        );
+    }
 }
+#endregion
