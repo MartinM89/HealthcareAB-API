@@ -166,7 +166,7 @@ public class BookingControllerGetMyBookingsTests
         var anon = ok.Value;
         var upcoming =
             (IEnumerable<BookingResponseDto>)
-                anon!.GetType().GetProperty("Upcomming")!.GetValue(anon)!;
+                anon!.GetType().GetProperty("Upcoming")!.GetValue(anon)!;
         var past =
             (IEnumerable<BookingResponseDto>)anon.GetType().GetProperty("Past")!.GetValue(anon)!;
 
