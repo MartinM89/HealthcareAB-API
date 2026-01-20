@@ -2,9 +2,9 @@ namespace HealthCareAB_v1.DTOs;
 
 public class TimeSlotAvailabilityDto
 {
-    public string Id { get; set; } = string.Empty;
-    public string Start { get; set; } = string.Empty;
-    public string End { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public required string Start { get; set; }
+    public required string End { get; set; }
     public bool IsAvailable { get; set; }
     public Guid? ScheduleId { get; set; }
 }
