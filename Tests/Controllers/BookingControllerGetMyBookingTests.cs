@@ -163,10 +163,16 @@ public class BookingControllerGetMyBookingsTests
         var action = await controller.GetByPatientId(CancellationToken.None);
 
         var ok = Assert.IsType<OkObjectResult>(action.Result);
-        var list = Assert.IsType<List<BookingResponseDto>>(ok.Value);
+        var anon = ok.Value;
+        var upcoming =
+            (IEnumerable<BookingResponseDto>)
+                anon!.GetType().GetProperty("Upcomming")!.GetValue(anon)!;
+        var past =
+            (IEnumerable<BookingResponseDto>)anon.GetType().GetProperty("Past")!.GetValue(anon)!;
 
-        Assert.Single(list);
-        Assert.Equal(new TimeOnly(9, 0), list[0].Start);
+        Assert.Single(upcoming);
+        Assert.Empty(past);
+        Assert.Equal(new TimeOnly(9, 0), upcoming.ToList()[0].Start);
     }
 
     [Fact]
@@ -185,8 +191,14 @@ public class BookingControllerGetMyBookingsTests
         var action = await controller.GetByPatientId(CancellationToken.None);
 
         var ok = Assert.IsType<OkObjectResult>(action.Result);
-        var list = Assert.IsType<List<BookingResponseDto>>(ok.Value);
+        var anon = ok.Value;
+        var upcoming =
+            (IEnumerable<BookingResponseDto>)
+                anon!.GetType().GetProperty("Upcomming")!.GetValue(anon)!;
+        var past =
+            (IEnumerable<BookingResponseDto>)anon.GetType().GetProperty("Past")!.GetValue(anon)!;
 
-        Assert.Empty(list);
+        Assert.Empty(upcoming);
+        Assert.Empty(past);
     }
 }
