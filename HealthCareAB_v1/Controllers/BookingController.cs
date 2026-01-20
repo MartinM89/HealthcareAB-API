@@ -71,9 +71,9 @@ public class BookingController(IBookingService bookingService) : ControllerBase
             return Unauthorized();
         }
 
-        var (upcomming, past) = await _bookingService.GetByPatientIdAsync(patientId, ct);
+        var (upcoming, past) = await _bookingService.GetByPatientIdAsync(patientId, ct);
 
-        return Ok(new { Upcomming = upcomming.Select(MapToDto), Past = past.Select(MapToDto) });
+        return Ok(new { Upcoming = upcoming.Select(MapToDto), Past = past.Select(MapToDto) });
     }
 
     private static BookingResponseDto MapToDto(Booking booking)
