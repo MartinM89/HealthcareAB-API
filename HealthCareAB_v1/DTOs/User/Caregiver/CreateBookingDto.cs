@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace HealthCareAB_v1.DTOs.User.Caregiver;
 
-public class CaregiverCreateBookingDto
+[ExcludeFromCodeCoverage]
+public class CreateBookingDto
 {
     public Guid PatientId { get; set; }
     public Guid CaregiverDailyScheduleId { get; set; }

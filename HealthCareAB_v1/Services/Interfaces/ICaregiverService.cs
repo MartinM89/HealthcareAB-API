@@ -5,15 +5,14 @@ namespace HealthCareAB_v1.Services.Interfaces;
 
 public interface ICaregiverService
 {
-    Task<CaregiverScheduleOverviewDto> GetScheduleOverviewAsync(
+    Task<ScheduleOverviewDto> GetScheduleOverviewAsync(
         Guid caregiverId,
         DateTime startDate,
         DateTime endDate
     );
-    Task<CaregiverScheduleOverviewDto> GetUpcomingSchedulesAsync(
-        Guid caregiverId,
-        int daysAhead = 30
-    );
+    Task<ScheduleOverviewDto> GetUpcomingSchedulesAsync(Guid caregiverId, int daysAhead = 30);
 
-    Task<Booking> CreateBookingForPatientAsync(Guid caregiverId, CaregiverCreateBookingDto request);
+    Task<Booking> CreateBookingForPatientAsync(Guid caregiverId, CreateBookingDto request);
+
+    Task<Booking> CancelBookingForPatientAsync(Guid caregiverId, CancelBookingDto request);
 }
