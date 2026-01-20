@@ -99,20 +99,5 @@ public class BookingService(
             .ThenByDescending(b => b.TimeSlot.Start);
 
         return (upcoming, past);
-
-        // return
-        // [
-        //     .. upcoming
-        //         .Concat(past)
-        //         .Select(b => new BookingResponseDto
-        //         {
-        //             Id = b.Id,
-        //             Comment = b.Comment,
-        //             CreatedAt = b.CreatedAt,
-        //             Date = b.Date,
-        //             Start = b.TimeSlot.Start,
-        //             End = b.TimeSlot.End,
-        //         }),
-        // ];
     }
 }
