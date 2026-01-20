@@ -48,8 +48,7 @@ public class BookingControllerGetMyBookingsTests
             bookingRepository,
             timeSlotService,
             caregiverDailyScheduleService,
-            userService,
-            db
+            userService
         );
 
         var controller = new BookingController(bookingService);

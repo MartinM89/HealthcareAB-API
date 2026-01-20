@@ -47,8 +47,7 @@ public class BookingControllerCancelBookingTests
             bookingRepository,
             timeSlotService,
             caregiverDailyScheduleService,
-            userService,
-            db
+            userService
         );
 
         var controller = new BookingController(bookingService);
