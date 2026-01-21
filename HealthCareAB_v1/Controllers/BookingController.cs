@@ -36,7 +36,7 @@ public class BookingController(IBookingService bookingService) : ControllerBase
     }
 
     [Authorize(Roles = Roles.Patient)]
-    [HttpDelete("{bookingId:guid}")]
+    [HttpDelete("cancel/{bookingId:guid}")]
     public async Task<IActionResult> Cancel(Guid bookingId, CancellationToken ct)
     {
         if (!TryGetUserId(out var patientId))
